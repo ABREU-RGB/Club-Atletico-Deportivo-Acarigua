@@ -1,37 +1,34 @@
 <template>
   <div class="login-container">
-    <!-- Fondo optimizado para móvil -->
+    <!-- Fondo con cancha de fútbol -->
     <div class="login-background">
-      <div class="background-shapes">
-        <div class="shape shape-1" />
-        <div class="shape shape-2" />
-        <div class="shape shape-3" />
-      </div>
-      <div class="gradient-overlay" />
+      <div class="soccer-field"></div>
+      <div class="gradient-overlay"></div>
     </div>
 
-    <!-- Contenedor principal optimizado para móvil -->
+    <!-- Contenedor principal -->
     <div class="login-center-wrapper">
-      <!-- Tarjeta de login móvil-first -->
+      <!-- Tarjeta de login -->
       <div class="login-card">
-        <!-- Header compacto para móvil -->
+        <!-- Header -->
         <div class="login-header">
           <div class="logo-section">
-            <div class="logo-icon">
-              <i class="el-icon-trophy" />
+            <div class="logo-container">
+              <img src="@/assets/icons/logo.png" alt="Club Atlético Deportivo Acarigua" class="logo-image">
             </div>
             <div class="logo-text">
               <h1>Club Atlético</h1>
               <p>Deportivo Acarigua</p>
+              <span class="club-motto">"La Armadura de Dios"</span>
             </div>
           </div>
           <div class="welcome-section">
             <h2>Bienvenido</h2>
-            <p>Ingresa a tu cuenta</p>
+            <p>Ingresa al sistema del club</p>
           </div>
         </div>
 
-        <!-- Formulario optimizado para touch -->
+        <!-- Formulario -->
         <el-form
           ref="loginForm"
           :model="loginForm"
@@ -39,9 +36,9 @@
           class="login-form"
           @submit.native.prevent="handleLogin"
         >
-          <el-form-item prop="username">
+          <el-form-item prop="username" class="form-item-custom">
             <div class="input-group">
-              <span class="input-icon">
+              <span class="input-icon" :class="{ 'input-icon-hidden': loginForm.username }">
                 <i class="el-icon-user" />
               </span>
               <el-input
@@ -50,13 +47,14 @@
                 placeholder="Usuario"
                 size="large"
                 class="mobile-input"
+                @input="handleInput"
               />
             </div>
           </el-form-item>
 
-          <el-form-item prop="password">
+          <el-form-item prop="password" class="form-item-custom">
             <div class="input-group">
-              <span class="input-icon">
+              <span class="input-icon" :class="{ 'input-icon-hidden': loginForm.password }">
                 <i class="el-icon-lock" />
               </span>
               <el-input
@@ -67,6 +65,7 @@
                 size="large"
                 class="mobile-input"
                 @keyup.enter.native="handleLogin"
+                @input="handleInput"
               />
               <button type="button" class="password-toggle" @click="showPwd">
                 <i :class="passwordType === 'password' ? 'el-icon-view' : 'el-icon-hide'" />
@@ -93,62 +92,53 @@
           </el-button>
         </el-form>
 
-        <!-- Demo accounts optimizado para móvil -->
-        <div class="demo-section">
-          <div class="demo-header">
-            <span class="demo-title">Accesos de Prueba</span>
+        <!-- Información del Club - Comentado -->
+        <!--
+        <div class="club-info-section">
+          <div class="info-header">
+            <span class="info-title">Club Atlético Deportivo Acarigua</span>
           </div>
-          <div class="demo-buttons">
-            <button
-              class="demo-btn mobile-demo-btn admin"
-              @click="fillDemo('admin')"
-              @touchstart="handleTouchStart"
-              @touchend="handleTouchEnd"
-            >
-              <i class="el-icon-user" />
-              <span>Admin</span>
-            </button>
-            <button
-              class="demo-btn mobile-demo-btn editor"
-              @click="fillDemo('editor')"
-              @touchstart="handleTouchStart"
-              @touchend="handleTouchEnd"
-            >
-              <i class="el-icon-edit" />
-              <span>Editor</span>
-            </button>
+          <div class="info-content">
+            <div class="info-item">
+              <i class="el-icon-office-building"></i>
+              <span>Asociación Civil RIF: J-503114630</span>
+            </div>
+            <div class="info-item">
+              <i class="el-icon-medal"></i>
+              <span>Afiliada a la Asociación de Fútbol de Portuguesa</span>
+            </div>
+            <div class="info-item">
+              <i class="el-icon-document"></i>
+              <span>Inscrita en el Ministerio del Deporte</span>
+            </div>
           </div>
         </div>
+        -->
 
-        <!-- Footer móvil -->
+        <!-- Footer sin línea superior -->
         <div class="login-footer">
-          <p>¿Primera vez?
-            <a href="#register" class="register-link">Solicitar acceso</a>
+          <p>¿Necesitas acceso?
+            <a href="#contact" class="register-link">Contacta a la directiva</a>
           </p>
+        </div>
+
+        <!-- Copyright dentro del card -->
+        <div class="login-copyright-card">
+          <p>&copy; 2024 Club Atlético Deportivo Acarigua - Todos los derechos reservados</p>
         </div>
       </div>
     </div>
 
-    <!-- Botón de volver optimizado para móvil -->
+    <!-- Botón de volver -->
     <div class="back-to-home">
       <button
         class="back-button mobile-back-button"
         @click="goToLanding"
-        @touchstart="handleTouchStart"
-        @touchend="handleTouchEnd"
       >
         <i class="el-icon-arrow-left" />
-        <span>Volver</span>
+        <span>Volver al Inicio</span>
       </button>
     </div>
-
-    <!-- Copyright móvil -->
-    <div class="login-copyright">
-      <p>&copy; 2024 Club Atlético Deportivo Acarigua</p>
-    </div>
-
-    <!-- Teclado virtual detector (solo móvil) -->
-    <div v-if="isMobile" class="keyboard-space" />
   </div>
 </template>
 
@@ -191,7 +181,6 @@ export default {
       this.$refs.username.focus()
     })
 
-    // Escuchar cambios de orientación y resize
     window.addEventListener('resize', this.detectMobile)
     window.addEventListener('orientationchange', this.detectMobile)
   },
@@ -202,16 +191,15 @@ export default {
   methods: {
     detectMobile() {
       this.isMobile = window.innerWidth <= 768
-      // Ajustar viewport para móviles
-      if (this.isMobile) {
-        document.querySelector('meta[name="viewport"]')?.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
-      }
     },
     showPwd() {
       this.passwordType = this.passwordType === 'password' ? 'text' : 'password'
       this.$nextTick(() => {
         this.$refs.password.focus()
       })
+    },
+    handleInput() {
+      // Este método se usa para el binding de los iconos
     },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
@@ -228,25 +216,8 @@ export default {
         }
       })
     },
-    fillDemo(role) {
-      if (role === 'admin') {
-        this.loginForm.username = 'admin'
-        this.loginForm.password = '111111'
-      } else if (role === 'editor') {
-        this.loginForm.username = 'editor'
-        this.loginForm.password = '111111'
-      }
-      this.$refs.password.focus()
-    },
     goToLanding() {
       this.$router.push('/')
-    },
-    handleTouchStart(event) {
-      // Efecto táctil para botones
-      event.currentTarget.style.transform = 'scale(0.95)'
-    },
-    handleTouchEnd(event) {
-      event.currentTarget.style.transform = 'scale(1)'
     }
   }
 }
@@ -255,16 +226,14 @@ export default {
 <style lang="scss" scoped>
 .login-container {
   min-height: 100vh;
-  min-height: 100dvh; /* Nueva unidad para móviles */
+  min-height: 100dvh;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #8B0000 100%);
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
@@ -276,43 +245,17 @@ export default {
   bottom: 0;
 }
 
-.background-shapes {
+.soccer-field {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-}
-
-.shape {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  animation: float 6s ease-in-out infinite;
-}
-
-.shape-1 {
-  width: 60px;
-  height: 60px;
-  top: 15%;
-  left: 10%;
-  animation-delay: 0s;
-}
-
-.shape-2 {
-  width: 80px;
-  height: 80px;
-  top: 65%;
-  right: 10%;
-  animation-delay: 2s;
-}
-
-.shape-3 {
-  width: 40px;
-  height: 40px;
-  bottom: 25%;
-  left: 20%;
-  animation-delay: 4s;
+  background-image: 
+    linear-gradient(90deg, transparent 49%, rgba(255,255,255,0.2) 49%, rgba(255,255,255,0.2) 51%, transparent 51%),
+    linear-gradient(transparent 49%, rgba(255,255,255,0.2) 49%, rgba(255,255,255,0.2) 51%, transparent 51%),
+    radial-gradient(circle at 50% 50%, transparent 69%, rgba(255,255,255,0.2) 69%, rgba(255,255,255,0.2) 71%, transparent 71%);
+  opacity: 0.3;
 }
 
 .gradient-overlay {
@@ -321,30 +264,29 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background:
-    radial-gradient(ellipse at top right, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom left, rgba(255, 119, 198, 0.2) 0%, transparent 50%);
+  background: linear-gradient(135deg, rgba(229, 29, 34, 0.9) 0%, rgba(139, 0, 0, 0.8) 100%);
 }
 
 .login-center-wrapper {
   position: relative;
   z-index: 2;
   width: 100%;
-  max-width: 400px;
+  max-width: 440px;
   padding: 1rem;
   margin: 0 auto;
 }
 
 .login-card {
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 16px;
   padding: 2rem 1.5rem;
   width: 100%;
   box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 20px 40px rgba(0, 0, 0, 0.15),
     0 0 0 1px rgba(255, 255, 255, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.4);
+  position: relative;
 }
 
 .login-header {
@@ -360,73 +302,97 @@ export default {
   margin-bottom: 1rem;
 }
 
-.logo-icon {
-  width: 45px;
-  height: 45px;
-  background: linear-gradient(135deg, #ff6b35, #f7931e);
-  border-radius: 10px;
+.logo-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 1.3rem;
-  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-  flex-shrink: 0;
+}
+
+.logo-image {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .logo-text h1 {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  color: #1a365d;
+  color: var(--color-text-dark);
   margin: 0;
   line-height: 1.2;
 }
 
 .logo-text p {
-  font-size: 0.85rem;
-  color: #718096;
+  font-size: 0.9rem;
+  color: var(--color-text-dark);
   margin: 0;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.club-motto {
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  font-style: italic;
   font-weight: 500;
 }
 
 .welcome-section h2 {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 600;
-  color: #1a365d;
+  color: var(--color-text-dark);
   margin: 0 0 0.25rem 0;
 }
 
 .welcome-section p {
-  color: #718096;
+  color: var(--color-text-light);
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .login-form {
   margin-bottom: 1.5rem;
 }
 
+/* Corregir posición de mensajes de error */
+:deep(.form-item-custom .el-form-item__error) {
+  padding-top: 4px !important;
+  margin-top: 2px !important;
+  position: relative !important;
+  top: 0 !important;
+  transform: none !important;
+}
+
 .input-group {
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* Reducido para acercar el mensaje de error */
 }
 
 .input-icon {
   position: absolute;
-  left: 12px;
-  z-index: 3;
-  color: #a0aec0;
+  left: 16px;
+  z-index: 2;
+  color: var(--color-text-light);
   font-size: 1.1rem;
   pointer-events: none;
+  transition: all 0.3s ease;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.input-icon-hidden {
+  opacity: 0;
+  transform: translateY(-50%) translateX(-10px);
 }
 
 .password-toggle {
   position: absolute;
   right: 12px;
   z-index: 3;
-  color: #a0aec0;
+  color: var(--color-text-light);
   cursor: pointer;
   font-size: 1.1rem;
   transition: all 0.2s ease;
@@ -439,25 +405,40 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-.password-toggle:hover,
-.password-toggle:active {
-  color: #ff6b35;
-  background: rgba(255, 107, 53, 0.1);
+.password-toggle:hover {
+  color: var(--color-primary);
+  background: rgba(229, 29, 34, 0.1);
 }
 
 :deep(.mobile-input .el-input__inner) {
-  padding-left: 40px !important;
+  padding-left: 16px !important;
   padding-right: 50px !important;
-  height: 52px !important; /* Más alto para touch */
-  border: 2px solid #e2e8f0;
+  height: 52px !important;
+  border: 2px solid var(--color-text-light);
   border-radius: 12px;
   background: #ffffff;
-  font-size: 16px !important; /* Previene zoom en iOS */
+  font-size: 16px !important;
   font-weight: 500;
   transition: all 0.2s ease;
   min-height: 52px;
+  color: var(--color-text-dark);
+}
+
+/* Asegurar que el placeholder tenga suficiente espacio */
+:deep(.mobile-input .el-input__inner::placeholder) {
+  color: var(--color-text-light);
+  opacity: 1;
+  padding-left: 30px !important;
+  transition: padding-left 0.3s ease;
+}
+
+/* Cuando hay texto, el placeholder desaparece naturalmente */
+:deep(.mobile-input .el-input__inner:not(:placeholder-shown)) {
+  padding-left: 16px !important;
 }
 
 :deep(.mobile-input .el-input__inner:hover) {
@@ -465,8 +446,9 @@ export default {
 }
 
 :deep(.mobile-input .el-input__inner:focus) {
-  border-color: #ff6b35;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(229, 29, 34, 0.1);
+  padding-left: 16px !important;
 }
 
 .form-options {
@@ -479,7 +461,7 @@ export default {
 }
 
 :deep(.mobile-checkbox .el-checkbox__label) {
-  color: #4a5568;
+  color: var(--color-text-dark);
   font-size: 0.9rem;
   font-weight: 500;
 }
@@ -489,9 +471,18 @@ export default {
   height: 18px;
 }
 
+:deep(.mobile-checkbox .el-checkbox__inner:hover) {
+  border-color: var(--color-primary);
+}
+
+:deep(.mobile-checkbox .el-checkbox__input.is-checked .el-checkbox__inner) {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 .forgot-link {
   font-size: 0.85rem;
-  color: #ff6b35;
+  color: var(--color-primary);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease;
@@ -499,111 +490,95 @@ export default {
   border-radius: 4px;
 }
 
-.forgot-link:hover,
-.forgot-link:active {
-  color: #e55a2b;
-  background: rgba(255, 107, 53, 0.05);
+.forgot-link:hover {
+  color: #8B0000;
+  background: rgba(229, 29, 34, 0.05);
 }
 
 .login-button.mobile-button {
   width: 100%;
   height: 52px;
-  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  background: linear-gradient(135deg, var(--color-primary), #8B0000);
   border: none;
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 4px 12px rgba(229, 29, 34, 0.3);
   min-height: 52px;
 }
 
-.login-button.mobile-button:hover,
-.login-button.mobile-button:active {
+.login-button.mobile-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+  box-shadow: 0 6px 20px rgba(229, 29, 34, 0.4);
 }
 
-.demo-section {
+/* Sección de Información del Club - Comentada */
+/*
+.club-info-section {
   margin: 1.5rem 0;
   padding: 1.25rem;
-  background: #f8fafc;
+  background: #f8f9fa;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
 }
 
-.demo-header {
+.info-header {
   text-align: center;
   margin-bottom: 1rem;
 }
 
-.demo-title {
-  font-size: 0.85rem;
+.info-title {
+  font-size: 0.9rem;
   font-weight: 600;
-  color: #4a5568;
+  color: var(--color-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.demo-buttons {
+.info-content {
   display: flex;
+  flex-direction: column;
   gap: 0.75rem;
-  justify-content: center;
-  flex-wrap: wrap;
 }
 
-.demo-btn.mobile-demo-btn {
-  flex: 1;
-  min-width: 120px;
-  border: 1px solid #e2e8f0;
-  background: white;
-  color: #4a5568;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  padding: 12px 16px;
-  border-radius: 10px;
+.info-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  min-height: 48px;
-  cursor: pointer;
-  touch-action: manipulation;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
 }
 
-.demo-btn.mobile-demo-btn:hover,
-.demo-btn.mobile-demo-btn:active {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.info-item i {
+  color: var(--color-primary);
+  font-size: 1rem;
+  flex-shrink: 0;
 }
 
-.demo-btn.mobile-demo-btn.admin:hover,
-.demo-btn.mobile-demo-btn.admin:active {
-  border-color: #ff6b35;
-  color: #ff6b35;
+.info-item span {
+  font-size: 0.8rem;
+  color: var(--color-text-dark);
+  font-weight: 500;
+  line-height: 1.3;
 }
+*/
 
-.demo-btn.mobile-demo-btn.editor:hover,
-.demo-btn.mobile-demo-btn.editor:active {
-  border-color: #4299e1;
-  color: #4299e1;
-}
-
+/* Footer sin línea superior */
 .login-footer {
   text-align: center;
-  padding-top: 1.25rem;
-  border-top: 1px solid #e2e8f0;
+  padding-top: 0; /* Eliminado el padding superior */
+  margin-bottom: 1rem;
+  border-top: none; /* Eliminada la línea gris */
 }
 
 .login-footer p {
-  color: #718096;
+  color: var(--color-text-light);
   margin: 0;
   font-size: 0.85rem;
 }
 
 .register-link {
-  color: #ff6b35;
+  color: var(--color-primary);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
@@ -611,11 +586,24 @@ export default {
   border-radius: 4px;
 }
 
-.register-link:hover,
-.register-link:active {
-  color: #e55a2b;
+.register-link:hover {
+  color: #8B0000;
   text-decoration: underline;
-  background: rgba(255, 107, 53, 0.05);
+  background: rgba(229, 29, 34, 0.05);
+}
+
+/* Copyright dentro del card */
+.login-copyright-card {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0; /* Solo esta línea queda */
+}
+
+.login-copyright-card p {
+  color: var(--color-text-light);
+  font-size: 0.75rem;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .back-to-home {
@@ -640,57 +628,15 @@ export default {
   cursor: pointer;
   transition: all 0.2s ease;
   min-height: 44px;
-  touch-action: manipulation;
 }
 
-.back-button.mobile-back-button:hover,
-.back-button.mobile-back-button:active {
+.back-button.mobile-back-button:hover {
   background: rgba(255, 255, 255, 0.25);
   color: white;
   transform: scale(0.98);
 }
 
-.login-copyright {
-  position: absolute;
-  bottom: 1rem;
-  left: 0;
-  right: 0;
-  text-align: center;
-  z-index: 2;
-  padding: 0 1rem;
-}
-
-.login-copyright p {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.75rem;
-  margin: 0;
-}
-
-.keyboard-space {
-  height: 0px;
-  transition: height 0.3s ease;
-}
-
-/* Animaciones optimizadas para móvil */
-@keyframes gradientShift {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-10px) scale(1.02);
-  }
-}
-
-/* Media Queries específicas para móvil */
+/* Media Queries para móvil */
 @media (max-width: 768px) {
   .login-container {
     align-items: flex-start;
@@ -714,26 +660,17 @@ export default {
     gap: 0.5rem;
   }
 
-  .logo-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 1.4rem;
+  .logo-image {
+    width: 65px;
+    height: 65px;
   }
 
   .logo-text h1 {
-    font-size: 1.3rem;
-  }
-
-  .welcome-section h2 {
     font-size: 1.4rem;
   }
 
-  .demo-buttons {
-    flex-direction: column;
-  }
-
-  .demo-btn.mobile-demo-btn {
-    min-width: 100%;
+  .welcome-section h2 {
+    font-size: 1.5rem;
   }
 
   .form-options {
@@ -750,10 +687,6 @@ export default {
   .back-button.mobile-back-button {
     padding: 0.6rem 0.8rem;
     font-size: 0.85rem;
-  }
-
-  .login-copyright {
-    bottom: 0.5rem;
   }
 }
 
@@ -774,25 +707,19 @@ export default {
   .login-form {
     margin-bottom: 1rem;
   }
-
-  .demo-section {
-    margin: 1rem 0;
-    padding: 1rem;
-  }
 }
 
-/* Soporte para dispositivos muy pequeños */
 @media (max-width: 360px) {
   .login-card {
     padding: 1rem 0.75rem;
   }
 
   .logo-text h1 {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
 
   .welcome-section h2 {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
 
   :deep(.mobile-input .el-input__inner) {
@@ -825,47 +752,9 @@ export default {
   .input-group {
     margin-bottom: 0.75rem;
   }
-}
-
-/* Mejoras de accesibilidad para touch */
-@media (hover: none) and (pointer: coarse) {
-  .password-toggle,
-  .demo-btn.mobile-demo-btn,
-  .back-button.mobile-back-button {
-    cursor: none;
-  }
-
-  :deep(.mobile-input .el-input__inner) {
-    font-size: 16px !important; /* Previene zoom en iOS */
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .login-card {
-    background: rgba(45, 55, 72, 0.95);
-    color: white;
-  }
-
-  .logo-text h1,
-  .welcome-section h2 {
-    color: white;
-  }
-
-  .logo-text p,
-  .welcome-section p {
-    color: #a0aec0;
-  }
-
-  :deep(.mobile-input .el-input__inner) {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: white;
-  }
-
-  .demo-section {
-    background: #1a202c;
-    border-color: #2d3748;
+  
+  .login-copyright-card {
+    display: none;
   }
 }
 </style>
