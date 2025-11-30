@@ -5,7 +5,8 @@ const { JWT_SECRET } = require('../middleware/auth');
 const getUsuarios = async (req, res) => {
   try {
     const [rows] = await pool.execute(
-      'SELECT id, email, nombre, apellido, rol, telefono, activo, created_at FROM usuarios WHERE activo = true ORDER BY created_at DESC'
+      'SELECT USUARIO_ID, EMAIL, ROL, ESTATUS, CREATED_AT FROM usuarios WHERE ESTATUS = ? ORDER BY CREATED_AT DESC',
+      ['ACTIVO']
     );
     res.json(rows);
   } catch (error) {
@@ -24,8 +25,8 @@ const login = async (req, res) => {
 
     // Buscar usuario en la base de datos
     const [users] = await pool.execute(
-      'SELECT * FROM usuarios WHERE email = ? AND activo = true',
-      [email]
+      'SELECT * FROM usuarios WHERE EMAIL = ? AND ESTATUS = ?',
+      [email, 'ACTIVO']
     );
 
     if (users.length === 0) {
@@ -34,22 +35,26 @@ const login = async (req, res) => {
 
     const user = users[0];
 
-    // Verificar contraseña (simple para desarrollo - sin hash)
-    const validPassword = password === '111111';
-
-    if (!validPassword) {
+    // Verificar contraseña (comparación directa - sin hash para desarrollo)
+    if (password !== user.PASSWORD) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
     // Generar token JWT
     const token = jwt.sign(
       {
-        userId: user.id,
-        email: user.email,
-        rol: user.rol
+        userId: user.USUARIO_ID,
+        email: user.EMAIL,
+        rol: user.ROL
       },
       JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '8h' }
+    );
+
+    // Guardar token en la base de datos
+    await pool.execute(
+      'UPDATE usuarios SET TOKEN = ?, ULTIMO_ACCESO = NOW() WHERE USUARIO_ID = ?',
+      [token, user.USUARIO_ID]
     );
 
     res.json({
@@ -70,8 +75,8 @@ const getInfo = async (req, res) => {
     const userId = req.userId;
 
     const [users] = await pool.execute(
-      'SELECT id, email, nombre, apellido, rol, telefono FROM usuarios WHERE id = ? AND activo = true',
-      [userId]
+      'SELECT USUARIO_ID, EMAIL, ROL FROM usuarios WHERE USUARIO_ID = ? AND ESTATUS = ?',
+      [userId, 'ACTIVO']
     );
 
     if (users.length === 0) {
@@ -82,10 +87,10 @@ const getInfo = async (req, res) => {
 
     res.json({
       data: {
-        roles: [user.rol],
-        name: `${user.nombre} ${user.apellido}`,
+        roles: [user.ROL],
+        name: user.EMAIL, // Usamos email como nombre ya que no hay nombre/apellido
         avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
-        introduction: `${user.rol} del Club Deportivo Acarigua`
+        introduction: `${user.ROL} del Club Atlético Deportivo Acarigua`
       }
     });
 
@@ -97,8 +102,14 @@ const getInfo = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    // En un sistema con tokens JWT, el logout se maneja en el cliente
-    // eliminando el token. Aquí solo confirmamos la acción.
+    // Limpiar el token de la base de datos
+    const userId = req.userId;
+
+    await pool.execute(
+      'UPDATE usuarios SET TOKEN = NULL WHERE USUARIO_ID = ?',
+      [userId]
+    );
+
     res.json({
       data: {
         message: 'Logout exitoso'
@@ -112,11 +123,11 @@ const logout = async (req, res) => {
 
 const createUsuario = async (req, res) => {
   try {
-    const { email, password, nombre, apellido, rol, telefono } = req.body;
+    const { email, password, rol } = req.body;
 
     // Verificar si el email ya existe
     const [existing] = await pool.execute(
-      'SELECT id FROM usuarios WHERE email = ?',
+      'SELECT USUARIO_ID FROM usuarios WHERE EMAIL = ?',
       [email]
     );
 
@@ -125,8 +136,8 @@ const createUsuario = async (req, res) => {
     }
 
     const [result] = await pool.execute(
-      'INSERT INTO usuarios (email, password, nombre, apellido, rol, telefono) VALUES (?, ?, ?, ?, ?, ?)',
-      [email, password || '111111', nombre, apellido, rol || 'entrenador', telefono]
+      'INSERT INTO usuarios (EMAIL, PASSWORD, ROL) VALUES (?, ?, ?)',
+      [email, password || '123456', rol || 'USUARIO']
     );
 
     res.status(201).json({
