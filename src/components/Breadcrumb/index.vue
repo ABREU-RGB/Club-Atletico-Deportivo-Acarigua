@@ -71,12 +71,42 @@ export default {
 .app-breadcrumb.el-breadcrumb {
   display: inline-block;
   font-size: 14px;
-  line-height: 50px;
+  line-height: 60px;
   margin-left: 8px;
 
-  .no-redirect {
-    color: #97a8be;
-    cursor: text;
+  ::v-deep {
+    .el-breadcrumb__item {
+      .el-breadcrumb__inner {
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 400;
+        transition: color 0.3s ease;
+
+        a {
+          color: rgba(255, 255, 255, 0.9);
+          text-decoration: none;
+
+          &:hover {
+            color: #ffffff;
+            text-decoration: underline;
+          }
+        }
+
+        &.no-redirect {
+          color: rgba(255, 255, 255, 0.5);
+          font-weight: 500;
+          cursor: default;
+        }
+      }
+
+      &:last-child .el-breadcrumb__inner {
+        color: #ffffff;
+        font-weight: 600;
+      }
+
+      .el-breadcrumb__separator {
+        color: rgba(255, 255, 255, 0.5);
+      }
+    }
   }
 }
 </style>

@@ -1,14 +1,17 @@
 <template>
-  <div class="sidebar-logo-container" :class="{'collapse':collapse}">
+  <div class="sidebar-logo-container" :class="{'collapse':collapse}" @click="toggleSideBar">
     <transition name="sidebarLogoFade">
-      <router-link v-if="collapse" key="collapse" class="sidebar-logo-link" to="/">
+      <div v-if="collapse" key="collapse" class="sidebar-logo-link">
         <img v-if="logo" :src="logo" class="sidebar-logo">
         <h1 v-else class="sidebar-title">{{ title }} </h1>
-      </router-link>
-      <router-link v-else key="expand" class="sidebar-logo-link" to="/">
+      </div>
+      <div v-else key="expand" class="sidebar-logo-link">
         <img v-if="logo" :src="logo" class="sidebar-logo">
-        <h1 class="sidebar-title">{{ title }} </h1>
-      </router-link>
+        <h1 class="sidebar-title">
+          <span class="club-name">Club Atlético</span>
+          <span class="club-subname">Deportivo Acarigua</span>
+        </h1>
+      </div>
     </transition>
   </div>
 </template>
@@ -25,7 +28,12 @@ export default {
   data() {
     return {
       title: 'Club Atlético Deportivo Acarigua',
-      logo: require('@/assets/icons/logo.png') // Cambia esto a tu ruta real
+      logo: require('@/assets/icons/logo.png')
+    }
+  },
+  methods: {
+    toggleSideBar() {
+      this.$store.dispatch('app/toggleSideBar')
     }
   }
 }
@@ -44,50 +52,58 @@ export default {
 .sidebar-logo-container {
   position: relative;
   width: 100%;
-  height: 60px;
-  line-height: 60px;
-  background: rgba(0, 0, 0, 0.15); // Fondo oscuro para destacar
+  height: 50px;
+  line-height: 50px;
+  background: rgba(0, 0, 0, 0.15);
   text-align: center;
   overflow: hidden;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.25);
+  }
 
   & .sidebar-logo-link {
     height: 100%;
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
-    text-decoration: none;
+    padding: 0 15px;
 
     & .sidebar-logo {
-      width: 40px;
-      height: 40px;
+      width: 32px;
+      height: 32px;
       vertical-align: middle;
       margin-right: 12px;
+      transition: transform 0.3s ease;
     }
 
     & .sidebar-title {
-      display: inline-block;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       margin: 0;
       color: #fff;
       font-weight: 600;
       line-height: 1.2;
-      font-size: 16px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 14px;
+      font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
       vertical-align: middle;
       text-align: left;
+      flex-grow: 1;
 
-      // Estilo similar al navbar del home
       .club-name {
-        font-size: 1.1rem;
+        font-size: 14px;
         font-weight: 700;
         color: #fff;
         display: block;
+        margin-bottom: 2px;
       }
 
       .club-subname {
-        font-size: 0.9rem;
+        font-size: 12px;
         font-weight: 500;
         color: #fff;
         opacity: 0.9;
@@ -104,6 +120,10 @@ export default {
     .sidebar-title {
       display: none;
     }
+  }
+
+  &:hover .sidebar-logo {
+    transform: scale(1.1);
   }
 }
 </style>
