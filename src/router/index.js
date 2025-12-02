@@ -82,20 +82,244 @@ export const constantRoutes = [
       {
         path: 'index',
         component: () => import('@/views/dashboard/index'),
-        name: 'Dashboard',
-        meta: { title: 'Dashboard', icon: 'dashboard', affix: true }
+        name: 'Inicio',
+        meta: { title: 'Inicio', icon: 'dashboard', affix: true }
       }
     ]
   },
+
+  // ========== ASISTENCIA ==========
   {
-    path: '/documentation',
+    path: '/asistencia',
+    component: Layout,
+    redirect: '/asistencia/registro',
+    name: 'Asistencia',
+    meta: {
+      title: 'Asistencia',
+      icon: 'el-icon-document'
+    },
+    children: [
+      {
+        path: 'registro',
+        component: () => import('@/views/asistencia/registro'),
+        name: 'RegistroDiario',
+        meta: { title: 'Registro Diario', icon: 'el-icon-edit' }
+      },
+      {
+        path: 'reportes-mes',
+        component: () => import('@/views/asistencia/reportes-mes'),
+        name: 'ReportesMes',
+        meta: { title: 'Reportes por Mes', icon: 'el-icon-data-analysis' }
+      },
+      {
+        path: 'estadisticas',
+        component: () => import('@/views/asistencia/estadisticas'),
+        name: 'EstadisticasAsistencia',
+        meta: { title: 'Estadísticas', icon: 'el-icon-pie-chart' }
+      },
+      {
+        path: 'historial',
+        component: () => import('@/views/asistencia/historial'),
+        name: 'HistorialCompleto',
+        meta: { title: 'Historial Completo', icon: 'el-icon-document-copy' }
+      }
+    ]
+  },
+
+  // ========== ATLETAS ==========
+  {
+    path: '/atletas',
+    component: Layout,
+    redirect: '/atletas/lista',
+    name: 'Atletas',
+    meta: {
+      title: 'Atletas',
+      icon: 'el-icon-user'
+    },
+    children: [
+      {
+        path: 'lista',
+        component: () => import('@/views/atletas/lista'),
+        name: 'ListaAtletas',
+        meta: { title: 'Lista Completa', icon: 'el-icon-s-custom' }
+      },
+      {
+        path: 'nuevo',
+        component: () => import('@/views/atletas/nuevo'),
+        name: 'NuevoAtleta',
+        meta: { title: 'Nuevo Atleta', icon: 'el-icon-plus' }
+      }
+    ]
+  },
+
+  // ========== CATEGORÍAS ==========
+  {
+    path: '/categorias',
     component: Layout,
     children: [
       {
         path: 'index',
-        component: () => import('@/views/documentation/index'),
-        name: 'Documentation',
-        meta: { title: 'Documentation', icon: 'documentation', affix: true }
+        component: () => import('@/views/categorias/index'),
+        name: 'Categorias',
+        meta: { title: 'Categorías', icon: 'el-icon-medal' }
+      }
+    ]
+  },
+
+  // ========== ENTRENADORES ==========
+  {
+    path: '/entrenadores',
+    component: Layout,
+    redirect: '/entrenadores/lista',
+    name: 'Entrenadores',
+    meta: {
+      title: 'Entrenadores',
+      icon: 'el-icon-user-solid'
+    },
+    children: [
+      {
+        path: 'lista',
+        component: () => import('@/views/entrenadores/lista'),
+        name: 'ListaEntrenadores',
+        meta: { title: 'Lista Completa', icon: 'el-icon-s-custom' }
+      },
+      {
+        path: 'asignacion',
+        component: () => import('@/views/entrenadores/asignacion'),
+        name: 'AsignacionAtletas',
+        meta: { title: 'Asignación Atletas', icon: 'el-icon-connection' }
+      },
+      {
+        path: 'horarios',
+        component: () => import('@/views/entrenadores/horarios'),
+        name: 'HorariosEntrenadores',
+        meta: { title: 'Horarios', icon: 'el-icon-time' }
+      },
+      {
+        path: 'especialidades',
+        component: () => import('@/views/entrenadores/especialidades'),
+        name: 'EspecialidadesEntrenadores',
+        meta: { title: 'Especialidades', icon: 'el-icon-star-on' }
+      }
+    ]
+  },
+
+  // ========== MÉDICO/ENFERMERÍA ==========
+  {
+    path: '/medico',
+    component: Layout,
+    redirect: '/medico/consultas',
+    name: 'Medico',
+    meta: {
+      title: 'Médico/Enfermería',
+      icon: 'el-icon-first-aid-kit'
+    },
+    children: [
+      {
+        path: 'consultas',
+        component: () => import('@/views/medico/consultas'),
+        name: 'ConsultasMedicas',
+        meta: { title: 'Consultas', icon: 'el-icon-document-checked' }
+      },
+      {
+        path: 'historial',
+        component: () => import('@/views/medico/historial'),
+        name: 'HistorialMedico',
+        meta: { title: 'Historial Médico', icon: 'el-icon-folder-opened' }
+      },
+      {
+        path: 'lesiones',
+        component: () => import('@/views/medico/lesiones'),
+        name: 'ReportesLesiones',
+        meta: { title: 'Reportes Lesiones', icon: 'el-icon-warning' }
+      }
+    ]
+  },
+
+  // ========== REPORTES ==========
+  {
+    path: '/reportes',
+    component: Layout,
+    redirect: '/reportes/rendimiento',
+    name: 'Reportes',
+    meta: {
+      title: 'Reportes',
+      icon: 'el-icon-data-line'
+    },
+    children: [
+      {
+        path: 'rendimiento',
+        component: () => import('@/views/reportes/rendimiento'),
+        name: 'RendimientoGeneral',
+        meta: { title: 'Rendimiento General', icon: 'el-icon-trend-charts' }
+      },
+      {
+        path: 'medicos',
+        component: () => import('@/views/reportes/medicos'),
+        name: 'ReportesMedicos',
+        meta: { title: 'Reportes Médicos', icon: 'el-icon-first-aid-kit' }
+      },
+      {
+        path: 'asistencia-mensual',
+        component: () => import('@/views/reportes/asistencia-mensual'),
+        name: 'AsistenciaMensual',
+        meta: { title: 'Asistencia Mensual', icon: 'el-icon-date' }
+      },
+      {
+        path: 'metas',
+        component: () => import('@/views/reportes/metas'),
+        name: 'MetasCumplidas',
+        meta: { title: 'Metas Cumplidas', icon: 'el-icon-trophy' }
+      },
+      {
+        path: 'exportar',
+        component: () => import('@/views/reportes/exportar'),
+        name: 'ExportarDatos',
+        meta: { title: 'Exportar Datos', icon: 'el-icon-download' }
+      }
+    ]
+  },
+
+  // ========== CONFIGURACIÓN ==========
+  {
+    path: '/configuracion',
+    component: Layout,
+    redirect: '/configuracion/usuarios',
+    name: 'Configuracion',
+    meta: {
+      title: 'Configuración',
+      icon: 'el-icon-setting'
+    },
+    children: [
+      {
+        path: 'usuarios',
+        component: () => import('@/views/configuracion/usuarios'),
+        name: 'UsuariosSistema',
+        meta: { title: 'Usuarios del Sistema', icon: 'el-icon-user' }
+      },
+      {
+        path: 'permisos',
+        component: () => import('@/views/configuracion/permisos'),
+        name: 'PermisosRoles',
+        meta: { title: 'Permisos y Roles', icon: 'el-icon-lock' }
+      },
+      {
+        path: 'club',
+        component: () => import('@/views/configuracion/club'),
+        name: 'ConfiguracionClub',
+        meta: { title: 'Configuración Club', icon: 'el-icon-office-building' }
+      },
+      {
+        path: 'notificaciones',
+        component: () => import('@/views/configuracion/notificaciones'),
+        name: 'ConfigNotificaciones',
+        meta: { title: 'Notificaciones', icon: 'el-icon-message' }
+      },
+      {
+        path: 'respaldo',
+        component: () => import('@/views/configuracion/respaldo'),
+        name: 'RespaldoDatos',
+        meta: { title: 'Respaldo de Datos', icon: 'el-icon-refresh' }
       }
     ]
   },
