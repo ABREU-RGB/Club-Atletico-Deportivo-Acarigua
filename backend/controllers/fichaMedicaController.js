@@ -5,11 +5,11 @@ const getFichasMedicas = async (req, res) => {
     try {
         const [rows] = await pool.execute(
             `SELECT f.*, 
-              a.NOMBRE as atleta_nombre,
-              a.APELLIDO as atleta_apellido
+              a.nombre as atleta_nombre,
+              a.apellido as atleta_apellido
        FROM ficha_medica f
-       LEFT JOIN atletas a ON f.ATLETA_ID = a.ATLETA_ID
-       ORDER BY f.CREATED_AT DESC`
+       LEFT JOIN atletas a ON f.atleta_id = a.atleta_id
+       ORDER BY f.created_at DESC`
         );
         res.json(rows);
     } catch (error) {
@@ -25,11 +25,11 @@ const getFichaMedicaByAtleta = async (req, res) => {
 
         const [rows] = await pool.execute(
             `SELECT f.*, 
-              a.NOMBRE as atleta_nombre,
-              a.APELLIDO as atleta_apellido
+              a.nombre as atleta_nombre,
+              a.apellido as atleta_apellido
        FROM ficha_medica f
-       LEFT JOIN atletas a ON f.ATLETA_ID = a.ATLETA_ID
-       WHERE f.ATLETA_ID = ?`,
+       LEFT JOIN atletas a ON f.atleta_id = a.atleta_id
+       WHERE f.atleta_id = ?`,
             [atleta_id]
         );
 
@@ -58,7 +58,7 @@ const createFichaMedica = async (req, res) => {
 
         // Verificar si ya existe ficha para este atleta
         const [existing] = await pool.execute(
-            'SELECT FICHA_ID FROM ficha_medica WHERE ATLETA_ID = ?',
+            'SELECT ficha_id FROM ficha_medica WHERE atleta_id = ?',
             [atleta_id]
         );
 
@@ -68,7 +68,7 @@ const createFichaMedica = async (req, res) => {
 
         const [result] = await pool.execute(
             `INSERT INTO ficha_medica 
-       (ATLETA_ID, ALERGIAS, TIPO_SANGUINEO, LESION, CONDICION_MEDICA, OBSERVACION) 
+       (atleta_id, alergias, tipo_sanguineo, lesion, condicion_medica, observacion) 
        VALUES (?, ?, ?, ?, ?, ?)`,
             [atleta_id, alergias, tipo_sanguineo, lesion, condicion_medica, observacion]
         );
@@ -98,8 +98,8 @@ const updateFichaMedica = async (req, res) => {
 
         const [result] = await pool.execute(
             `UPDATE ficha_medica 
-       SET ALERGIAS = ?, TIPO_SANGUINEO = ?, LESION = ?, CONDICION_MEDICA = ?, OBSERVACION = ?
-       WHERE FICHA_ID = ?`,
+       SET alergias = ?, tipo_sanguineo = ?, lesion = ?, condicion_medica = ?, observacion = ?
+       WHERE ficha_id = ?`,
             [alergias, tipo_sanguineo, lesion, condicion_medica, observacion, id]
         );
 

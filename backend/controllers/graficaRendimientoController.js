@@ -5,11 +5,11 @@ const getGraficas = async (req, res) => {
     try {
         const [rows] = await pool.execute(
             `SELECT g.*, 
-              a.NOMBRE as atleta_nombre,
-              a.APELLIDO as atleta_apellido
+              a.nombre as atleta_nombre,
+              a.apellido as atleta_apellido
        FROM grafica_de_rendimiento g
-       LEFT JOIN atletas a ON g.ATLETA_ID = a.ATLETA_ID
-       ORDER BY g.FECHA_GENERACION DESC`
+       LEFT JOIN atletas a ON g.atleta_id = a.atleta_id
+       ORDER BY g.fecha_generacion DESC`
         );
         res.json(rows);
     } catch (error) {
@@ -25,12 +25,12 @@ const getGraficaByAtleta = async (req, res) => {
 
         const [rows] = await pool.execute(
             `SELECT g.*, 
-              a.NOMBRE as atleta_nombre,
-              a.APELLIDO as atleta_apellido
+              a.nombre as atleta_nombre,
+              a.apellido as atleta_apellido
        FROM grafica_de_rendimiento g
-       LEFT JOIN atletas a ON g.ATLETA_ID = a.ATLETA_ID
-       WHERE g.ATLETA_ID = ?
-       ORDER BY g.FECHA_GENERACION DESC`,
+       LEFT JOIN atletas a ON g.atleta_id = a.atleta_id
+       WHERE g.atleta_id = ?
+       ORDER BY g.fecha_generacion DESC`,
             [atleta_id]
         );
 
@@ -46,17 +46,17 @@ const createGrafica = async (req, res) => {
     try {
         const {
             atleta_id,
-            id_test,
-            id_medidas,
+            test_id,
+            medidas_id,
             fecha_generacion,
             observaciones
         } = req.body;
 
         const [result] = await pool.execute(
             `INSERT INTO grafica_de_rendimiento 
-       (ATLETA_ID, ID_TEST, ID_MEDIDAS, FECHA_GENERACION, OBSERVACIONES) 
+       (atleta_id, test_id, medidas_id, fecha_generacion, observaciones) 
        VALUES (?, ?, ?, ?, ?)`,
-            [atleta_id, id_test, id_medidas, fecha_generacion || new Date().toISOString().split('T')[0], observaciones]
+            [atleta_id, test_id, medidas_id, fecha_generacion || new Date().toISOString().split('T')[0], observaciones]
         );
 
         res.status(201).json({
@@ -78,16 +78,16 @@ const getDatosGrafica = async (req, res) => {
         // Obtener tests
         const [tests] = await pool.execute(
             `SELECT * FROM test_de_rendimiento 
-       WHERE ATLETA_ID = ? 
-       ORDER BY FECHA_TEST ASC`,
+       WHERE atleta_id = ? 
+       ORDER BY fecha_test ASC`,
             [atleta_id]
         );
 
         // Obtener medidas
         const [medidas] = await pool.execute(
             `SELECT * FROM medidas_antropometricas 
-       WHERE ATLETA_ID = ? 
-       ORDER BY FECHA_MEDICION ASC`,
+       WHERE atleta_id = ? 
+       ORDER BY fecha_medicion ASC`,
             [atleta_id]
         );
 

@@ -4,7 +4,7 @@ const dbConfig = {
   host: 'localhost',
   user: 'root',
   password: '', // Si tienes password en XAMPP, ponlo aquí
-  database: 'club_atletico_acarigua',
+  database: 'club_atletico_db',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -28,7 +28,7 @@ const testConnection = async () => {
     console.log('💡 Verifica que:');
     console.log('   - XAMPP esté ejecutándose');
     console.log('   - MySQL esté activo en XAMPP');
-    console.log('   - La base de datos "club_atletico_acarigua" exista');
+    console.log('   - La base de datos "club_atletico_db" exista');
     console.log('   - El usuario y password sean correctos');
   }
 };

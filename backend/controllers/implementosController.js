@@ -9,11 +9,11 @@ const getImplementos = async (req, res) => {
         const params = [];
 
         if (estatus) {
-            query += ' AND ESTATUS = ?';
+            query += ' AND estatus = ?';
             params.push(estatus);
         }
 
-        query += ' ORDER BY TIPO ASC';
+        query += ' ORDER BY tipo ASC';
 
         const [rows] = await pool.execute(query, params);
         res.json(rows);
@@ -29,7 +29,7 @@ const getImplementoById = async (req, res) => {
         const { id } = req.params;
 
         const [rows] = await pool.execute(
-            'SELECT * FROM implementos_deportivos WHERE IMPLEMENTO_ID = ?',
+            'SELECT * FROM implementos_deportivos WHERE implemento_id = ?',
             [id]
         );
 
@@ -50,7 +50,7 @@ const createImplemento = async (req, res) => {
         const { tipo, cantidad, estatus, ubicacion } = req.body;
 
         const [result] = await pool.execute(
-            `INSERT INTO implementos_deportivos (TIPO, CANTIDAD, ESTATUS, UBICACION) 
+            `INSERT INTO implementos_deportivos (tipo, cantidad, estatus, ubicacion) 
        VALUES (?, ?, ?, ?)`,
             [tipo, cantidad || 0, estatus || 'DISPONIBLE', ubicacion]
         );
@@ -74,8 +74,8 @@ const updateImplemento = async (req, res) => {
 
         const [result] = await pool.execute(
             `UPDATE implementos_deportivos 
-       SET TIPO = ?, CANTIDAD = ?, ESTATUS = ?, UBICACION = ?
-       WHERE IMPLEMENTO_ID = ?`,
+       SET tipo = ?, cantidad = ?, estatus = ?, ubicacion = ?
+       WHERE implemento_id = ?`,
             [tipo, cantidad, estatus, ubicacion, id]
         );
 
@@ -97,7 +97,7 @@ const updateEstatus = async (req, res) => {
         const { estatus } = req.body;
 
         const [result] = await pool.execute(
-            'UPDATE implementos_deportivos SET ESTATUS = ? WHERE IMPLEMENTO_ID = ?',
+            'UPDATE implementos_deportivos SET estatus = ? WHERE implemento_id = ?',
             [estatus, id]
         );
 
@@ -118,7 +118,7 @@ const deleteImplemento = async (req, res) => {
         const { id } = req.params;
 
         const [result] = await pool.execute(
-            'DELETE FROM implementos_deportivos WHERE IMPLEMENTO_ID = ?',
+            'DELETE FROM implementos_deportivos WHERE implemento_id = ?',
             [id]
         );
 
