@@ -7,23 +7,23 @@ const getMediciones = async (req, res) => {
 
     let query = `
       SELECT m.*, 
-             atl.NOMBRE as atleta_nombre, 
-             atl.APELLIDO as atleta_apellido,
-             c.NOMBRE_CATEGORIA as categoria_nombre,
-             TIMESTAMPDIFF(YEAR, atl.FECHA_NACIMIENTO, CURDATE()) as edad
+             atl.nombre as atleta_nombre, 
+             atl.apellido as atleta_apellido,
+             c.nombre_categoria as categoria_nombre,
+             TIMESTAMPDIFF(YEAR, atl.fecha_nacimiento, CURDATE()) as edad
       FROM medidas_antropometricas m
-      LEFT JOIN atletas atl ON m.ATLETA_ID = atl.ATLETA_ID
-      LEFT JOIN categoria c ON atl.CATEGORIA_ID = c.CATEGORIA_ID
+      LEFT JOIN atletas atl ON m.atleta_id = atl.atleta_id
+      LEFT JOIN categoria c ON atl.categoria_id = c.categoria_id
       WHERE 1=1
     `;
     const params = [];
 
     if (atleta_id) {
-      query += ' AND m.ATLETA_ID = ?';
+      query += ' AND m.atleta_id = ?';
       params.push(atleta_id);
     }
 
-    query += ' ORDER BY m.FECHA_MEDICION DESC, atl.NOMBRE ASC';
+    query += ' ORDER BY m.fecha_medicion DESC, atl.nombre ASC';
 
     const [rows] = await pool.execute(query, params);
     res.json(rows);
@@ -40,11 +40,11 @@ const getMedicionesByAtleta = async (req, res) => {
 
     const [rows] = await pool.execute(
       `SELECT m.*, 
-              TIMESTAMPDIFF(YEAR, atl.FECHA_NACIMIENTO, CURDATE()) as edad
+              TIMESTAMPDIFF(YEAR, atl.fecha_nacimiento, CURDATE()) as edad
        FROM medidas_antropometricas m
-       LEFT JOIN atletas atl ON m.ATLETA_ID = atl.ATLETA_ID
-       WHERE m.ATLETA_ID = ? AND atl.ESTATUS IN ('ACTIVO', 'LESIONADO')
-       ORDER BY m.FECHA_MEDICION DESC`,
+       LEFT JOIN atletas atl ON m.atleta_id = atl.atleta_id
+       WHERE m.atleta_id = ? AND atl.estatus IN ('ACTIVO', 'LESIONADO')
+       ORDER BY m.fecha_medicion DESC`,
       [atleta_id]
     );
 
@@ -78,7 +78,7 @@ const createMedicion = async (req, res) => {
 
     const [result] = await pool.execute(
       `INSERT INTO medidas_antropometricas 
-       (ATLETA_ID, FECHA_MEDICION, PESO, ALTURA, INDICE_DE_MASA, ENVERGADURA, LARGO_DE_PIERNA, LARGO_DE_TORSO) 
+       (atleta_id, fecha_medicion, peso, altura, indice_de_masa, envergadura, largo_de_pierna, largo_de_torso) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [atleta_id, fecha_medicion, peso, altura, calculatedIMC, envergadura, largo_de_pierna, largo_de_torso]
     );
@@ -103,8 +103,8 @@ const getUltimaMedicion = async (req, res) => {
     const [rows] = await pool.execute(
       `SELECT m.*
        FROM medidas_antropometricas m
-       WHERE m.ATLETA_ID = ?
-       ORDER BY m.FECHA_MEDICION DESC
+       WHERE m.atleta_id = ?
+       ORDER BY m.fecha_medicion DESC
        LIMIT 1`,
       [atleta_id]
     );
@@ -126,10 +126,10 @@ const getEvolucionPeso = async (req, res) => {
     const { atleta_id } = req.params;
 
     const [rows] = await pool.execute(
-      `SELECT FECHA_MEDICION, PESO, INDICE_DE_MASA
+      `SELECT fecha_medicion, peso, indice_de_masa
        FROM medidas_antropometricas 
-       WHERE ATLETA_ID = ? AND PESO IS NOT NULL
-       ORDER BY FECHA_MEDICION ASC`,
+       WHERE atleta_id = ? AND peso IS NOT NULL
+       ORDER BY fecha_medicion ASC`,
       [atleta_id]
     );
 

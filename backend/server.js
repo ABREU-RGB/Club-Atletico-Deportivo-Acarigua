@@ -50,7 +50,7 @@ app.get('/api', (req, res) => {
   res.json({
     message: '🏆 API Club Atlético Deportivo Acarigua - Sistema de Gestión Deportiva',
     version: '2.0.0',
-    database: 'club_atletico_acarigua',
+    database: 'club_atletico_db',
     endpoints: {
       usuarios: '/api/usuarios',
       atletas: '/api/atletas',
@@ -89,7 +89,7 @@ app.use((error, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor API corriendo en: http://localhost:${PORT}`);
-  console.log(`📊 Base de datos: club_atletico_acarigua`);
+  console.log(`📊 Base de datos: club_atletico_db`);
   console.log(`📍 Ruta principal: http://localhost:${PORT}/api`);
   console.log('✅ Servidor iniciado correctamente');
   console.log('\n📋 Endpoints disponibles:');

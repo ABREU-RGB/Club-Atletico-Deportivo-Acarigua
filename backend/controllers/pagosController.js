@@ -7,25 +7,25 @@ const getPagos = async (req, res) => {
 
         let query = `
       SELECT p.*, 
-             a.NOMBRE as atleta_nombre,
-             a.APELLIDO as atleta_apellido
+             a.nombre as atleta_nombre,
+             a.apellido as atleta_apellido
       FROM pagos p
-      LEFT JOIN atletas a ON p.ATLETA_ID = a.ATLETA_ID
+      LEFT JOIN atletas a ON p.atleta_id = a.atleta_id
       WHERE 1=1
     `;
         const params = [];
 
         if (estatus) {
-            query += ' AND p.ESTATUS = ?';
+            query += ' AND p.estatus = ?';
             params.push(estatus);
         }
 
         if (atleta_id) {
-            query += ' AND p.ATLETA_ID = ?';
+            query += ' AND p.atleta_id = ?';
             params.push(atleta_id);
         }
 
-        query += ' ORDER BY p.CREATED_AT DESC';
+        query += ' ORDER BY p.created_at DESC';
 
         const [rows] = await pool.execute(query, params);
         res.json(rows);
@@ -42,8 +42,8 @@ const getPagosByAtleta = async (req, res) => {
 
         const [rows] = await pool.execute(
             `SELECT * FROM pagos 
-       WHERE ATLETA_ID = ? 
-       ORDER BY CREATED_AT DESC`,
+       WHERE atleta_id = ? 
+       ORDER BY created_at DESC`,
             [atleta_id]
         );
 
@@ -59,13 +59,13 @@ const getPagosPendientes = async (req, res) => {
     try {
         const [rows] = await pool.execute(
             `SELECT p.*, 
-              a.NOMBRE as atleta_nombre,
-              a.APELLIDO as atleta_apellido,
-              a.TELEFONO as atleta_telefono
+              a.nombre as atleta_nombre,
+              a.apellido as atleta_apellido,
+              a.telefono as atleta_telefono
        FROM pagos p
-       LEFT JOIN atletas a ON p.ATLETA_ID = a.ATLETA_ID
-       WHERE p.ESTATUS IN ('PENDIENTE', 'VENCIDO')
-       ORDER BY p.MES_CORRESPONDIENTE DESC`
+       LEFT JOIN atletas a ON p.atleta_id = a.atleta_id
+       WHERE p.estatus IN ('PENDIENTE', 'VENCIDO')
+       ORDER BY p.mes_correspondiente DESC`
         );
 
         res.json(rows);
@@ -81,7 +81,7 @@ const createPago = async (req, res) => {
         const { atleta_id, mes_correspondiente, monto, estatus, fecha_pago, ref_pago } = req.body;
 
         const [result] = await pool.execute(
-            `INSERT INTO pagos (ATLETA_ID, MES_CORRESPONDIENTE, MONTO, ESTATUS, FECHA_PAGO, REF_PAGO) 
+            `INSERT INTO pagos (atleta_id, mes_correspondiente, monto, estatus, fecha_pago, ref_pago) 
        VALUES (?, ?, ?, ?, ?, ?)`,
             [atleta_id, mes_correspondiente, monto, estatus || 'PENDIENTE', fecha_pago, ref_pago]
         );
@@ -105,8 +105,8 @@ const updatePago = async (req, res) => {
 
         const [result] = await pool.execute(
             `UPDATE pagos 
-       SET ESTATUS = ?, FECHA_PAGO = ?, REF_PAGO = ?, MONTO = ?
-       WHERE PAGO_ID = ?`,
+       SET estatus = ?, fecha_pago = ?, ref_pago = ?, monto = ?
+       WHERE pago_id = ?`,
             [estatus, fecha_pago, ref_pago, monto, id]
         );
 
@@ -129,8 +129,8 @@ const marcarComoPagado = async (req, res) => {
 
         const [result] = await pool.execute(
             `UPDATE pagos 
-       SET ESTATUS = 'PAGADO', FECHA_PAGO = ?, REF_PAGO = ?
-       WHERE PAGO_ID = ?`,
+       SET estatus = 'PAGADO', fecha_pago = ?, ref_pago = ?
+       WHERE pago_id = ?`,
             [fecha_pago || new Date().toISOString().split('T')[0], ref_pago, id]
         );
 

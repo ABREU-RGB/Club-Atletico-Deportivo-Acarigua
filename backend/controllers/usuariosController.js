@@ -5,7 +5,7 @@ const { JWT_SECRET } = require('../middleware/auth');
 const getUsuarios = async (req, res) => {
   try {
     const [rows] = await pool.execute(
-      'SELECT USUARIO_ID, EMAIL, ROL, ESTATUS, CREATED_AT FROM usuarios WHERE ESTATUS = ? ORDER BY CREATED_AT DESC',
+      'SELECT usuario_id, email, rol, estatus, created_at FROM usuarios WHERE estatus = ? ORDER BY created_at DESC',
       ['ACTIVO']
     );
     res.json(rows);
@@ -25,7 +25,7 @@ const login = async (req, res) => {
 
     // Buscar usuario en la base de datos
     const [users] = await pool.execute(
-      'SELECT * FROM usuarios WHERE EMAIL = ? AND ESTATUS = ?',
+      'SELECT * FROM usuarios WHERE email = ? AND estatus = ?',
       [email, 'ACTIVO']
     );
 
@@ -36,16 +36,16 @@ const login = async (req, res) => {
     const user = users[0];
 
     // Verificar contraseña (comparación directa - sin hash para desarrollo)
-    if (password !== user.PASSWORD) {
+    if (password !== user.password) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
     // Generar token JWT
     const token = jwt.sign(
       {
-        userId: user.USUARIO_ID,
-        email: user.EMAIL,
-        rol: user.ROL
+        userId: user.usuario_id,
+        email: user.email,
+        rol: user.rol
       },
       JWT_SECRET,
       { expiresIn: '8h' }
@@ -53,8 +53,8 @@ const login = async (req, res) => {
 
     // Guardar token en la base de datos
     await pool.execute(
-      'UPDATE usuarios SET TOKEN = ?, ULTIMO_ACCESO = NOW() WHERE USUARIO_ID = ?',
-      [token, user.USUARIO_ID]
+      'UPDATE usuarios SET token = ?, ultimo_acceso = NOW() WHERE usuario_id = ?',
+      [token, user.usuario_id]
     );
 
     res.json({
@@ -75,7 +75,7 @@ const getInfo = async (req, res) => {
     const userId = req.userId;
 
     const [users] = await pool.execute(
-      'SELECT USUARIO_ID, EMAIL, ROL FROM usuarios WHERE USUARIO_ID = ? AND ESTATUS = ?',
+      'SELECT usuario_id, email, rol FROM usuarios WHERE usuario_id = ? AND estatus = ?',
       [userId, 'ACTIVO']
     );
 
@@ -87,10 +87,10 @@ const getInfo = async (req, res) => {
 
     res.json({
       data: {
-        roles: [user.ROL],
-        name: user.EMAIL, // Usamos email como nombre ya que no hay nombre/apellido
+        roles: [user.rol],
+        name: user.email, // Usamos email como nombre ya que no hay nombre/apellido
         avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
-        introduction: `${user.ROL} del Club Atlético Deportivo Acarigua`
+        introduction: `${user.rol} del Club Atlético Deportivo Acarigua`
       }
     });
 
@@ -106,7 +106,7 @@ const logout = async (req, res) => {
     const userId = req.userId;
 
     await pool.execute(
-      'UPDATE usuarios SET TOKEN = NULL WHERE USUARIO_ID = ?',
+      'UPDATE usuarios SET token = NULL WHERE usuario_id = ?',
       [userId]
     );
 
@@ -127,7 +127,7 @@ const createUsuario = async (req, res) => {
 
     // Verificar si el email ya existe
     const [existing] = await pool.execute(
-      'SELECT USUARIO_ID FROM usuarios WHERE EMAIL = ?',
+      'SELECT usuario_id FROM usuarios WHERE email = ?',
       [email]
     );
 
@@ -136,7 +136,7 @@ const createUsuario = async (req, res) => {
     }
 
     const [result] = await pool.execute(
-      'INSERT INTO usuarios (EMAIL, PASSWORD, ROL) VALUES (?, ?, ?)',
+      'INSERT INTO usuarios (email, password, rol) VALUES (?, ?, ?)',
       [email, password || '123456', rol || 'USUARIO']
     );
 

@@ -7,23 +7,23 @@ const getTests = async (req, res) => {
 
     let query = `
       SELECT t.*, 
-             atl.NOMBRE as atleta_nombre, 
-             atl.APELLIDO as atleta_apellido,
-             c.NOMBRE_CATEGORIA as categoria_nombre,
-             TIMESTAMPDIFF(YEAR, atl.FECHA_NACIMIENTO, CURDATE()) as edad
+             atl.nombre as atleta_nombre, 
+             atl.apellido as atleta_apellido,
+             c.nombre_categoria as categoria_nombre,
+             TIMESTAMPDIFF(YEAR, atl.fecha_nacimiento, CURDATE()) as edad
       FROM test_de_rendimiento t
-      LEFT JOIN atletas atl ON t.ATLETA_ID = atl.ATLETA_ID
-      LEFT JOIN categoria c ON atl.CATEGORIA_ID = c.CATEGORIA_ID
+      LEFT JOIN atletas atl ON t.atleta_id = atl.atleta_id
+      LEFT JOIN categoria c ON atl.categoria_id = c.categoria_id
       WHERE 1=1
     `;
     const params = [];
 
     if (atleta_id) {
-      query += ' AND t.ATLETA_ID = ?';
+      query += ' AND t.atleta_id = ?';
       params.push(atleta_id);
     }
 
-    query += ' ORDER BY t.FECHA_TEST DESC, atl.NOMBRE ASC';
+    query += ' ORDER BY t.fecha_test DESC, atl.nombre ASC';
 
     const [rows] = await pool.execute(query, params);
     res.json(rows);
@@ -41,9 +41,9 @@ const getTestsByAtleta = async (req, res) => {
     const [rows] = await pool.execute(
       `SELECT t.*
        FROM test_de_rendimiento t
-       LEFT JOIN atletas atl ON t.ATLETA_ID = atl.ATLETA_ID
-       WHERE t.ATLETA_ID = ? AND atl.ESTATUS IN ('ACTIVO', 'LESIONADO')
-       ORDER BY t.FECHA_TEST DESC`,
+       LEFT JOIN atletas atl ON t.atleta_id = atl.atleta_id
+       WHERE t.atleta_id = ? AND atl.estatus IN ('ACTIVO', 'LESIONADO')
+       ORDER BY t.fecha_test DESC`,
       [atleta_id]
     );
 
@@ -69,7 +69,7 @@ const createTest = async (req, res) => {
 
     const [result] = await pool.execute(
       `INSERT INTO test_de_rendimiento 
-       (ATLETA_ID, FECHA_TEST, TEST_DE_FUERZA, TEST_RESISTENCIA, TEST_VELOCIDAD, TEST_COORDINACION, TEST_DE_REACCION) 
+       (atleta_id, fecha_test, test_de_fuerza, test_resistencia, test_velocidad, test_coordinacion, test_de_reaccion) 
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [atleta_id, fecha_test, test_de_fuerza, test_resistencia, test_velocidad, test_coordinacion, test_de_reaccion]
     );
@@ -91,11 +91,11 @@ const getEstadisticasTests = async (req, res) => {
     const [rows] = await pool.execute(
       `SELECT 
         COUNT(*) as total_tests,
-        AVG(TEST_DE_FUERZA) as promedio_fuerza,
-        AVG(TEST_RESISTENCIA) as promedio_resistencia,
-        AVG(TEST_VELOCIDAD) as promedio_velocidad,
-        AVG(TEST_COORDINACION) as promedio_coordinacion,
-        AVG(TEST_DE_REACCION) as promedio_reaccion
+        AVG(test_de_fuerza) as promedio_fuerza,
+        AVG(test_resistencia) as promedio_resistencia,
+        AVG(test_velocidad) as promedio_velocidad,
+        AVG(test_coordinacion) as promedio_coordinacion,
+        AVG(test_de_reaccion) as promedio_reaccion
        FROM test_de_rendimiento`
     );
 
@@ -112,10 +112,10 @@ const getEvolucionTest = async (req, res) => {
     const { atleta_id } = req.params;
 
     const [rows] = await pool.execute(
-      `SELECT FECHA_TEST, TEST_DE_FUERZA, TEST_RESISTENCIA, TEST_VELOCIDAD, TEST_COORDINACION, TEST_DE_REACCION
+      `SELECT fecha_test, test_de_fuerza, test_resistencia, test_velocidad, test_coordinacion, test_de_reaccion
        FROM test_de_rendimiento 
-       WHERE ATLETA_ID = ?
-       ORDER BY FECHA_TEST ASC`,
+       WHERE atleta_id = ?
+       ORDER BY fecha_test ASC`,
       [atleta_id]
     );
 
@@ -134,8 +134,8 @@ const getUltimoTest = async (req, res) => {
     const [rows] = await pool.execute(
       `SELECT *
        FROM test_de_rendimiento 
-       WHERE ATLETA_ID = ?
-       ORDER BY FECHA_TEST DESC
+       WHERE atleta_id = ?
+       ORDER BY fecha_test DESC
        LIMIT 1`,
       [atleta_id]
     );

@@ -5,14 +5,14 @@ const getCategorias = async (req, res) => {
     try {
         const [rows] = await pool.execute(
             `SELECT c.*, 
-              p.NOMBRE as entrenador_nombre,
-              p.APELLIDO as entrenador_apellido,
-              COUNT(a.ATLETA_ID) as total_atletas
+              p.nombre as entrenador_nombre,
+              p.apellido as entrenador_apellido,
+              COUNT(a.atleta_id) as total_atletas
        FROM categoria c
-       LEFT JOIN plantel p ON c.ENTRENADOR_ID = p.PLANTEL_ID
-       LEFT JOIN atletas a ON c.CATEGORIA_ID = a.CATEGORIA_ID AND a.ESTATUS IN ('ACTIVO', 'LESIONADO')
-       GROUP BY c.CATEGORIA_ID
-       ORDER BY c.EDAD_MIN ASC`
+       LEFT JOIN plantel p ON c.entrenador_id = p.plantel_id
+       LEFT JOIN atletas a ON c.categoria_id = a.categoria_id AND a.estatus IN ('ACTIVO', 'LESIONADO')
+       GROUP BY c.categoria_id
+       ORDER BY c.edad_min ASC`
         );
         res.json(rows);
     } catch (error) {
@@ -27,11 +27,11 @@ const getCategoriaById = async (req, res) => {
         const { id } = req.params;
         const [rows] = await pool.execute(
             `SELECT c.*, 
-              p.NOMBRE as entrenador_nombre,
-              p.APELLIDO as entrenador_apellido
+              p.nombre as entrenador_nombre,
+              p.apellido as entrenador_apellido
        FROM categoria c
-       LEFT JOIN plantel p ON c.ENTRENADOR_ID = p.PLANTEL_ID
-       WHERE c.CATEGORIA_ID = ?`,
+       LEFT JOIN plantel p ON c.entrenador_id = p.plantel_id
+       WHERE c.categoria_id = ?`,
             [id]
         );
 
@@ -52,7 +52,7 @@ const createCategoria = async (req, res) => {
         const { nombre_categoria, edad_min, edad_max, entrenador_id } = req.body;
 
         const [result] = await pool.execute(
-            `INSERT INTO categoria (NOMBRE_CATEGORIA, EDAD_MIN, EDAD_MAX, ENTRENADOR_ID) 
+            `INSERT INTO categoria (nombre_categoria, edad_min, edad_max, entrenador_id) 
        VALUES (?, ?, ?, ?)`,
             [nombre_categoria, edad_min, edad_max, entrenador_id]
         );
@@ -76,8 +76,8 @@ const updateCategoria = async (req, res) => {
 
         const [result] = await pool.execute(
             `UPDATE categoria 
-       SET NOMBRE_CATEGORIA = ?, EDAD_MIN = ?, EDAD_MAX = ?, ENTRENADOR_ID = ?
-       WHERE CATEGORIA_ID = ?`,
+       SET nombre_categoria = ?, edad_min = ?, edad_max = ?, entrenador_id = ?
+       WHERE categoria_id = ?`,
             [nombre_categoria, edad_min, edad_max, entrenador_id, id]
         );
 
@@ -99,7 +99,7 @@ const deleteCategoria = async (req, res) => {
 
         // Verificar si hay atletas en esta categoría
         const [atletas] = await pool.execute(
-            'SELECT COUNT(*) as total FROM atletas WHERE CATEGORIA_ID = ?',
+            'SELECT COUNT(*) as total FROM atletas WHERE categoria_id = ?',
             [id]
         );
 
@@ -110,7 +110,7 @@ const deleteCategoria = async (req, res) => {
         }
 
         const [result] = await pool.execute(
-            'DELETE FROM categoria WHERE CATEGORIA_ID = ?',
+            'DELETE FROM categoria WHERE categoria_id = ?',
             [id]
         );
 

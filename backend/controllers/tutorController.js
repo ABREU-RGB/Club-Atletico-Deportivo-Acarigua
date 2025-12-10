@@ -5,11 +5,11 @@ const getTutores = async (req, res) => {
     try {
         const [rows] = await pool.execute(
             `SELECT t.*,
-              COUNT(a.ATLETA_ID) as total_atletas
+              COUNT(a.atleta_id) as total_atletas
        FROM tutor t
-       LEFT JOIN atletas a ON t.TUTOR_ID = a.TUTOR_ID
-       GROUP BY t.TUTOR_ID
-       ORDER BY t.NOMBRE_COMPLETO ASC`
+       LEFT JOIN atletas a ON t.tutor_id = a.tutor_id
+       GROUP BY t.tutor_id
+       ORDER BY t.nombre_completo ASC`
         );
         res.json(rows);
     } catch (error) {
@@ -24,7 +24,7 @@ const getTutorById = async (req, res) => {
         const { id } = req.params;
 
         const [rows] = await pool.execute(
-            'SELECT * FROM tutor WHERE TUTOR_ID = ?',
+            'SELECT * FROM tutor WHERE tutor_id = ?',
             [id]
         );
 
@@ -34,9 +34,9 @@ const getTutorById = async (req, res) => {
 
         // Obtener atletas asociados
         const [atletas] = await pool.execute(
-            `SELECT ATLETA_ID, NOMBRE, APELLIDO 
+            `SELECT atleta_id, nombre, apellido 
        FROM atletas 
-       WHERE TUTOR_ID = ? AND ESTATUS IN ('ACTIVO', 'LESIONADO')`,
+       WHERE tutor_id = ? AND estatus IN ('ACTIVO', 'LESIONADO')`,
             [id]
         );
 
@@ -56,7 +56,7 @@ const createTutor = async (req, res) => {
         const { nombre_completo, telefono, correo, direccion, tipo_relacion } = req.body;
 
         const [result] = await pool.execute(
-            `INSERT INTO tutor (NOMBRE_COMPLETO, TELEFONO, CORREO, DIRECCION, TIPO_RELACION) 
+            `INSERT INTO tutor (nombre_completo, telefono, correo, direccion, tipo_relacion) 
        VALUES (?, ?, ?, ?, ?)`,
             [nombre_completo, telefono, correo, direccion, tipo_relacion]
         );
@@ -80,8 +80,8 @@ const updateTutor = async (req, res) => {
 
         const [result] = await pool.execute(
             `UPDATE tutor 
-       SET NOMBRE_COMPLETO = ?, TELEFONO = ?, CORREO = ?, DIRECCION = ?, TIPO_RELACION = ?
-       WHERE TUTOR_ID = ?`,
+       SET nombre_completo = ?, telefono = ?, correo = ?, direccion = ?, tipo_relacion = ?
+       WHERE tutor_id = ?`,
             [nombre_completo, telefono, correo, direccion, tipo_relacion, id]
         );
 
@@ -103,7 +103,7 @@ const deleteTutor = async (req, res) => {
 
         // Verificar si hay atletas asociados
         const [atletas] = await pool.execute(
-            'SELECT COUNT(*) as total FROM atletas WHERE TUTOR_ID = ?',
+            'SELECT COUNT(*) as total FROM atletas WHERE tutor_id = ?',
             [id]
         );
 
@@ -114,7 +114,7 @@ const deleteTutor = async (req, res) => {
         }
 
         const [result] = await pool.execute(
-            'DELETE FROM tutor WHERE TUTOR_ID = ?',
+            'DELETE FROM tutor WHERE tutor_id = ?',
             [id]
         );
 
