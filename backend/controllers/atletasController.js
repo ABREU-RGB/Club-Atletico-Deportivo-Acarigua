@@ -4,14 +4,14 @@ const getAtletas = async (req, res) => {
   try {
     const [rows] = await pool.execute(
       `SELECT a.*, 
-              TIMESTAMPDIFF(YEAR, a.FECHA_NACIMIENTO, CURDATE()) as edad,
-              c.NOMBRE_CATEGORIA as categoria_nombre,
-              t.NOMBRE_COMPLETO as tutor_nombre
+              TIMESTAMPDIFF(YEAR, a.fecha_nacimiento, CURDATE()) as edad,
+              c.nombre_categoria as categoria_nombre,
+              t.nombre_completo as tutor_nombre
        FROM atletas a 
-       LEFT JOIN categoria c ON a.CATEGORIA_ID = c.CATEGORIA_ID
-       LEFT JOIN tutor t ON a.TUTOR_ID = t.TUTOR_ID
-       WHERE a.ESTATUS IN ('ACTIVO', 'LESIONADO')
-       ORDER BY a.CREATED_AT DESC`
+       LEFT JOIN categoria c ON a.categoria_id = c.categoria_id
+       LEFT JOIN tutor t ON a.tutor_id = t.tutor_id
+       WHERE a.estatus IN ('ACTIVO', 'LESIONADO')
+       ORDER BY a.created_at DESC`
     );
     res.json(rows);
   } catch (error) {
@@ -25,14 +25,14 @@ const getAtletaById = async (req, res) => {
     const { id } = req.params;
     const [rows] = await pool.execute(
       `SELECT a.*, 
-              TIMESTAMPDIFF(YEAR, a.FECHA_NACIMIENTO, CURDATE()) as edad,
-              c.NOMBRE_CATEGORIA as categoria_nombre,
-              t.NOMBRE_COMPLETO as tutor_nombre,
-              t.TELEFONO as tutor_telefono
+              TIMESTAMPDIFF(YEAR, a.fecha_nacimiento, CURDATE()) as edad,
+              c.nombre_categoria as categoria_nombre,
+              t.nombre_completo as tutor_nombre,
+              t.telefono as tutor_telefono
        FROM atletas a 
-       LEFT JOIN categoria c ON a.CATEGORIA_ID = c.CATEGORIA_ID
-       LEFT JOIN tutor t ON a.TUTOR_ID = t.TUTOR_ID
-       WHERE a.ATLETA_ID = ?`,
+       LEFT JOIN categoria c ON a.categoria_id = c.categoria_id
+       LEFT JOIN tutor t ON a.tutor_id = t.tutor_id
+       WHERE a.atleta_id = ?`,
       [id]
     );
 
@@ -63,7 +63,7 @@ const createAtleta = async (req, res) => {
 
     const [result] = await pool.execute(
       `INSERT INTO atletas 
-       (NOMBRE, APELLIDO, TELEFONO, DIRECCION, FECHA_NACIMIENTO, POSICION_DE_JUEGO, CATEGORIA_ID, TUTOR_ID, ESTATUS) 
+       (nombre, apellido, telefono, direccion, fecha_nacimiento, posicion_de_juego, categoria_id, tutor_id, estatus) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [nombre, apellido, telefono, direccion, fecha_nacimiento, posicion_de_juego, categoria_id, tutor_id, estatus || 'ACTIVO']
     );
@@ -96,9 +96,9 @@ const updateAtleta = async (req, res) => {
 
     const [result] = await pool.execute(
       `UPDATE atletas 
-       SET NOMBRE = ?, APELLIDO = ?, TELEFONO = ?, DIRECCION = ?, FECHA_NACIMIENTO = ?, 
-           POSICION_DE_JUEGO = ?, CATEGORIA_ID = ?, TUTOR_ID = ?, ESTATUS = ?
-       WHERE ATLETA_ID = ?`,
+       SET nombre = ?, apellido = ?, telefono = ?, direccion = ?, fecha_nacimiento = ?, 
+           posicion_de_juego = ?, categoria_id = ?, tutor_id = ?, estatus = ?
+       WHERE atleta_id = ?`,
       [nombre, apellido, telefono, direccion, fecha_nacimiento, posicion_de_juego, categoria_id, tutor_id, estatus, id]
     );
 
@@ -118,7 +118,7 @@ const deleteAtleta = async (req, res) => {
     const { id } = req.params;
 
     const [result] = await pool.execute(
-      'UPDATE atletas SET ESTATUS = ? WHERE ATLETA_ID = ?',
+      'UPDATE atletas SET estatus = ? WHERE atleta_id = ?',
       ['INACTIVO', id]
     );
 

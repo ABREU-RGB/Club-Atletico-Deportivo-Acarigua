@@ -9,11 +9,11 @@ const getPlantel = async (req, res) => {
         const params = [];
 
         if (rol) {
-            query += ' AND ROL = ?';
+            query += ' AND rol = ?';
             params.push(rol);
         }
 
-        query += ' ORDER BY ROL ASC, NOMBRE ASC';
+        query += ' ORDER BY rol ASC, nombre ASC';
 
         const [rows] = await pool.execute(query, params);
         res.json(rows);
@@ -29,7 +29,7 @@ const getPlantelById = async (req, res) => {
         const { id } = req.params;
 
         const [rows] = await pool.execute(
-            'SELECT * FROM plantel WHERE PLANTEL_ID = ?',
+            'SELECT * FROM plantel WHERE plantel_id = ?',
             [id]
         );
 
@@ -50,7 +50,7 @@ const getPlantelByRol = async (req, res) => {
         const { rol } = req.params;
 
         const [rows] = await pool.execute(
-            'SELECT * FROM plantel WHERE ROL = ? ORDER BY NOMBRE ASC',
+            'SELECT * FROM plantel WHERE rol = ? ORDER BY nombre ASC',
             [rol]
         );
 
@@ -67,7 +67,7 @@ const createMiembroPlantel = async (req, res) => {
         const { nombre, apellido, telefono, rol } = req.body;
 
         const [result] = await pool.execute(
-            `INSERT INTO plantel (NOMBRE, APELLIDO, TELEFONO, ROL) 
+            `INSERT INTO plantel (nombre, apellido, telefono, rol) 
        VALUES (?, ?, ?, ?)`,
             [nombre, apellido, telefono, rol]
         );
@@ -91,8 +91,8 @@ const updateMiembroPlantel = async (req, res) => {
 
         const [result] = await pool.execute(
             `UPDATE plantel 
-       SET NOMBRE = ?, APELLIDO = ?, TELEFONO = ?, ROL = ?
-       WHERE PLANTEL_ID = ?`,
+       SET nombre = ?, apellido = ?, telefono = ?, rol = ?
+       WHERE plantel_id = ?`,
             [nombre, apellido, telefono, rol, id]
         );
 
@@ -114,7 +114,7 @@ const deleteMiembroPlantel = async (req, res) => {
 
         // Verificar si el miembro está asignado a alguna categoría
         const [categorias] = await pool.execute(
-            'SELECT COUNT(*) as total FROM categoria WHERE ENTRENADOR_ID = ?',
+            'SELECT COUNT(*) as total FROM categoria WHERE entrenador_id = ?',
             [id]
         );
 
@@ -125,7 +125,7 @@ const deleteMiembroPlantel = async (req, res) => {
         }
 
         const [result] = await pool.execute(
-            'DELETE FROM plantel WHERE PLANTEL_ID = ?',
+            'DELETE FROM plantel WHERE plantel_id = ?',
             [id]
         );
 
