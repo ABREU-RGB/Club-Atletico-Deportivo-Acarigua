@@ -130,24 +130,12 @@ export const constantRoutes = [
   {
     path: '/atletas',
     component: Layout,
-    redirect: '/atletas/lista',
-    name: 'Atletas',
-    meta: {
-      title: 'Atletas',
-      icon: 'el-icon-user'
-    },
     children: [
       {
-        path: 'lista',
-        component: () => import('@/views/atletas/lista'),
-        name: 'ListaAtletas',
-        meta: { title: 'Lista Completa', icon: 'el-icon-s-custom' }
-      },
-      {
-        path: 'nuevo',
-        component: () => import('@/views/atletas/nuevo'),
-        name: 'NuevoAtleta',
-        meta: { title: 'Nuevo Atleta', icon: 'el-icon-plus' }
+        path: 'index',
+        component: () => import('@/views/atletas/index'),
+        name: 'Atletas',
+        meta: { title: 'Atletas', icon: 'el-icon-user' }
       }
     ]
   },

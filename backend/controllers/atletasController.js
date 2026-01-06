@@ -133,10 +133,32 @@ const deleteAtleta = async (req, res) => {
   }
 };
 
+const updateAtletaTutor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tutor_id } = req.body;
+
+    const [result] = await pool.execute(
+      'UPDATE atletas SET tutor_id = ? WHERE atleta_id = ?',
+      [tutor_id, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Atleta no encontrado' });
+    }
+
+    res.json({ message: 'Tutor asignado exitosamente' });
+  } catch (error) {
+    console.error('Error asignando tutor:', error);
+    res.status(500).json({ error: 'Error al asignar tutor' });
+  }
+};
+
 module.exports = {
   getAtletas,
   getAtletaById,
   createAtleta,
   updateAtleta,
+  updateAtletaTutor,
   deleteAtleta
 };

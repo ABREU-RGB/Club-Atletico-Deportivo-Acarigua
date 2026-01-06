@@ -1,17 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getAtletas, 
-  getAtletaById, 
-  createAtleta, 
-  updateAtleta, 
-  deleteAtleta 
-} = require('../controllers/atletasController');
+const atletasController = require('../controllers/atletasController');
 
-router.get('/', getAtletas);
-router.get('/:id', getAtletaById);
-router.post('/', createAtleta);
-router.put('/:id', updateAtleta);
-router.delete('/:id', deleteAtleta);
+// Rutas existentes
+router.get('/', atletasController.getAtletas);
+router.get('/:id', atletasController.getAtletaById);
+router.post('/', atletasController.createAtleta);
+router.put('/:id', atletasController.updateAtleta);
+router.put('/:id/tutor', atletasController.updateAtletaTutor); // Nueva ruta específica
+router.delete('/:id', atletasController.deleteAtleta);
 
 module.exports = router;
