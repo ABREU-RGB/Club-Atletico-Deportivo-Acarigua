@@ -607,7 +607,6 @@ export default {
         fecha_nacimiento: '',
         posicion_de_juego: '',
         categoria_id: '',
-        // tutor_id solo interno para mantener referencia
         tutor_id: null,
         telefono: '',
         direccion: '',
@@ -663,7 +662,6 @@ export default {
   },
   methods: {
     async loadData() {
-      // Cargar categorías primero para asegurar nombre de entrenadores
       await this.loadCategorias()
       await Promise.all([
         this.loadAtletas(),
@@ -704,13 +702,11 @@ export default {
       this.currentAtleta = this.atletas.find(a => a.atleta_id === id) || {}
       this.activeTab = 'personal'
 
-      // Limpiar estados previos para evitar "flash" de datos incorrectos
       this.fichaMedica = null
       this.medidas = []
       this.tests = []
       this.tutor = null
 
-      // Cargar datos relacionados
       await Promise.all([
         this.loadFichaMedica(id),
         this.loadMedidas(id),
@@ -759,7 +755,6 @@ export default {
       }
     },
 
-    // Botón Editar Dinámico
     handleEdit() {
       switch (this.activeTab) {
         case 'personal':
@@ -780,7 +775,6 @@ export default {
       }
     },
 
-    // Abrir modales
     openAtletaModal(editing) {
       this.isEditingAtleta = editing
       if (editing && this.currentAtleta) {
@@ -790,7 +784,7 @@ export default {
           fecha_nacimiento: this.currentAtleta.fecha_nacimiento,
           posicion_de_juego: this.currentAtleta.posicion_de_juego || '',
           categoria_id: this.currentAtleta.categoria_id,
-          tutor_id: this.currentAtleta.tutor_id || null, // Mantener ID si existe
+          tutor_id: this.currentAtleta.tutor_id || null,
           telefono: this.currentAtleta.telefono || '',
           direccion: this.currentAtleta.direccion || '',
           estatus: this.currentAtleta.estatus || 'ACTIVO'
@@ -817,14 +811,40 @@ export default {
     },
 
     openAnthropometricModal() {
-      this.resetAnthropometricForm()
-      this.anthropometricForm.fecha_medicion = new Date().toISOString().split('T')[0]
+      if (this.medidas && this.medidas.length > 0) {
+        // Pre-llenar con la última medida registrada
+        const ultimaMedida = this.medidas[0]
+        this.anthropometricForm = {
+          peso: ultimaMedida.peso,
+          altura: ultimaMedida.altura,
+          indice_de_masa: ultimaMedida.indice_de_masa,
+          envergadura: ultimaMedida.envergadura,
+          largo_de_pierna: ultimaMedida.largo_de_pierna,
+          largo_de_torso: ultimaMedida.largo_de_torso,
+          fecha_medicion: new Date().toISOString().split('T')[0]
+        }
+      } else {
+        this.resetAnthropometricForm()
+        this.anthropometricForm.fecha_medicion = new Date().toISOString().split('T')[0]
+      }
       this.showAnthropometricModal = true
     },
 
     openPerformanceModal() {
-      this.resetPerformanceForm()
-      this.performanceForm.fecha_test = new Date().toISOString().split('T')[0]
+      if (this.tests && this.tests.length > 0) {
+        const ultimoTest = this.tests[0]
+        this.performanceForm = {
+          test_de_fuerza: ultimoTest.test_de_fuerza,
+          test_resistencia: ultimoTest.test_resistencia,
+          test_velocidad: ultimoTest.test_velocidad,
+          test_coordinacion: ultimoTest.test_coordinacion,
+          test_de_reaccion: ultimoTest.test_de_reaccion,
+          fecha_test: new Date().toISOString().split('T')[0]
+        }
+      } else {
+        this.resetPerformanceForm()
+        this.performanceForm.fecha_test = new Date().toISOString().split('T')[0]
+      }
       this.showPerformanceModal = true
     },
 
@@ -845,7 +865,6 @@ export default {
       this.showTutorModal = true
     },
 
-    // Guardar datos
     saveAtleta() {
       this.$refs.atletaForm.validate(async(valid) => {
         if (!valid) return
@@ -892,7 +911,6 @@ export default {
         }
 
         if (this.fichaMedica) {
-          // Actualizar
           await request({
             url: `/ficha-medica/${this.fichaMedica.ficha_id}`,
             method: 'put',
@@ -900,7 +918,6 @@ export default {
           })
           this.$message.success('Ficha médica actualizada')
         } else {
-          // Crear
           await request({
             url: '/ficha-medica',
             method: 'post',
@@ -976,7 +993,6 @@ export default {
         this.loading = true
         try {
           if (this.isEditingTutor && this.tutor) {
-            // Actualizar tutor existente
             await request({
               url: `/tutor/${this.tutor.tutor_id}`,
               method: 'put',
@@ -984,14 +1000,12 @@ export default {
             })
             this.$message.success('Tutor actualizado correctamente')
           } else {
-            // Crear nuevo tutor
             const response = await request({
               url: '/tutor',
               method: 'post',
               data: this.tutorForm
             })
 
-            // El backend devuelve { message: '...', id: ... }
             const nuevoTutorId = response.id || response.tutor_id || response.insertId
 
             if (!nuevoTutorId) {
@@ -1003,8 +1017,6 @@ export default {
               throw new Error('No hay atleta seleccionado para asignar tutor')
             }
 
-            // Usar endpoint específico para actualizar SOLO el tutor
-            // Evita errores de validación por otros campos faltantes o nulos
             await request({
               url: `/atletas/${this.currentAtletaId}/tutor`,
               method: 'put',
@@ -1016,7 +1028,6 @@ export default {
 
           this.showTutorModal = false
           await this.loadAtletas()
-          // Recargar el atleta actual para reflejar cambios (incluido el nuevo tutor)
           await this.selectAtleta(this.currentAtletaId)
         } catch (error) {
           console.error('Error guardando tutor:', error)
@@ -1049,7 +1060,6 @@ export default {
       }).catch(() => {})
     },
 
-    // Reset formularios
     resetAtletaForm() {
       this.atletaForm = {
         nombre: '',
@@ -1107,7 +1117,6 @@ export default {
       }
     },
 
-    // Utilidades
     calculateAge(birthdate) {
       if (!birthdate) return '-'
       const birthDate = new Date(birthdate)
