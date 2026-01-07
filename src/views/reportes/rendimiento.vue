@@ -7,69 +7,102 @@
           <h1><i class="el-icon-data-line" /> Análisis de Progreso</h1>
           <p class="subtitle">Evolución y Rendimiento del Atleta</p>
         </div>
-        <div class="header-filters">
-          <el-select
-            v-model="selectedAtletaId"
-            filterable
-            placeholder="Seleccionar Atleta"
-            @change="handleAtletaChange"
-          >
-            <el-option
-              v-for="item in atletas"
-              :key="item.atleta_id"
-              :label="item.nombre + ' ' + item.apellido"
-              :value="item.atleta_id"
-            />
-          </el-select>
-        </div>
       </div>
     </div>
 
-    <!-- Empty State -->
-    <el-card v-if="!selectedAtletaId" class="empty-card">
-      <div class="empty-state">
-        <i class="el-icon-user" />
-        <h3>Selecciona un atleta para ver su progreso</h3>
-        <p>Utiliza el selector de la esquina superior derecha para comenzar el análisis.</p>
+    <!-- Barra de Control Compacta -->
+    <el-card class="control-panel" shadow="hover">
+      <div class="control-content">
+        <div class="search-section">
+          <label class="control-label"><i class="el-icon-search" /> Buscar Atleta:</label>
+          <el-select
+            v-model="selectedAtletaId"
+            filterable
+            remote
+            :remote-method="filterAtletas"
+            no-data-text="No se encontraron atletas"
+            placeholder="Nombre o Apellido..."
+            class="compact-search"
+            @change="handleAtletaChange"
+          >
+            <el-option
+              v-for="item in filteredAtletas"
+              :key="item.atleta_id"
+              :label="item.nombre + ' ' + item.apellido"
+              :value="item.atleta_id"
+            >
+              <div class="atleta-option">
+                <img v-if="item.foto" :src="getFotoUrl(item.foto)" class="option-avatar">
+                <div v-else class="option-avatar-placeholder"><i class="el-icon-user" /></div>
+                <span>{{ item.nombre }} {{ item.apellido }}</span>
+                <el-tag size="mini" type="info" class="option-tag">{{ item.categoria_nombre }}</el-tag>
+              </div>
+            </el-option>
+          </el-select>
+        </div>
+
+        <div class="filter-section">
+          <label class="control-label"><i class="el-icon-medal" /> Categoría:</label>
+          <el-select v-model="selectedCategoriaId" placeholder="Todas" clearable class="compact-select" @change="handleCategoriaChange">
+            <el-option
+              v-for="cat in categorias"
+              :key="cat.categoria_id"
+              :label="cat.nombre_categoria"
+              :value="cat.categoria_id"
+            />
+          </el-select>
+        </div>
+
+        <div class="actions-section">
+          <el-button type="danger" icon="el-icon-printer" :disabled="!selectedAtletaId" @click="printCurrentReport">Imprimir Atleta</el-button>
+          <el-button type="primary" icon="el-icon-document-copy" :disabled="!selectedCategoriaId" @click="printCategoryReports">Reportes Categoría</el-button>
+        </div>
       </div>
     </el-card>
 
-    <div v-else v-loading="loading">
+    <!-- Content Area -->
+    <div v-if="!selectedAtletaId" class="empty-layout">
+      <el-card class="empty-card">
+        <div class="empty-state">
+          <i class="el-icon-user" />
+          <h3>Selecciona un atleta para ver su progreso</h3>
+          <p>Utiliza el buscador compacto para comenzar el análisis.</p>
+        </div>
+      </el-card>
+    </div>
+
+    <div v-else v-loading="loading" class="printable-area">
       <!-- Athlete Profile Mini Card -->
-      <el-row :gutter="20">
-        <el-col :span="24">
-          <el-card shadow="hover" class="athlete-summary-card">
-            <div class="summary-content">
-              <div class="athlete-avatar">
-                <img v-if="atleta.foto" :src="getFotoUrl(atleta.foto)" class="avatar-img">
-                <i v-else class="el-icon-user" />
-              </div>
-              <div class="athlete-details">
-                <h2>{{ atleta.nombre }} {{ atleta.apellido }}</h2>
-                <div class="tags">
-                  <el-tag size="small" type="danger">{{ atleta.categoria_nombre }}</el-tag>
-                  <el-tag size="small" type="info">{{ atleta.posicion_de_juego || 'Sin posición' }}</el-tag>
-                  <el-tag size="small" type="success">Pierna: {{ atleta.pierna_dominante || 'Derecha' }}</el-tag>
-                </div>
-              </div>
-              <div class="quick-stats">
-                <div class="stat-mini">
-                  <span class="label">Peso Actual</span>
-                  <span class="value">{{ latestMedicion ? latestMedicion.peso + ' kg' : '-' }}</span>
-                </div>
-                <div class="stat-mini">
-                  <span class="label">IMC</span>
-                  <span class="value">{{ latestMedicion ? latestMedicion.indice_de_masa : '-' }}</span>
-                </div>
-                <div class="stat-mini">
-                  <span class="label">Tests</span>
-                  <span class="value">{{ tests.length }} realizados</span>
-                </div>
-              </div>
+      <el-card shadow="hover" class="athlete-summary-card">
+        <div class="summary-content">
+          <div class="athlete-avatar">
+            <img v-if="atleta.foto" :src="getFotoUrl(atleta.foto)" class="avatar-img">
+            <i v-else class="el-icon-user" />
+          </div>
+          <div class="athlete-details">
+            <h2>{{ atleta.nombre }} {{ atleta.apellido }}</h2>
+            <div class="tags">
+              <el-tag size="small" type="danger">{{ atleta.categoria_nombre }}</el-tag>
+              <el-tag size="small" type="info">{{ atleta.posicion_de_juego || 'Sin posición' }}</el-tag>
+              <el-tag size="small" type="success">Pierna: {{ atleta.pierna_dominante || 'Derecha' }}</el-tag>
             </div>
-          </el-card>
-        </el-col>
-      </el-row>
+          </div>
+          <div class="quick-stats">
+            <div class="stat-mini">
+              <span class="label">Peso Actual</span>
+              <span class="value">{{ latestMedicion ? latestMedicion.peso + ' kg' : '-' }}</span>
+            </div>
+            <div class="stat-mini">
+              <span class="label">IMC</span>
+              <span class="value">{{ latestMedicion ? latestMedicion.indice_de_masa : '-' }}</span>
+            </div>
+            <div class="stat-mini">
+              <span class="label">Tests</span>
+              <span class="value">{{ tests.length }} realizados</span>
+            </div>
+          </div>
+        </div>
+      </el-card>
 
       <!-- Trends Row -->
       <el-row :gutter="20" class="stat-cards">
@@ -87,7 +120,7 @@
 
       <!-- Charts Grid -->
       <el-row :gutter="20">
-        <el-col :span="16">
+        <el-col :span="16" class="performance-evolution-column">
           <el-card shadow="hover" class="chart-card">
             <div slot="header">
               <span><i class="el-icon-line-chart" /> Evolución de Rendimiento</span>
@@ -95,7 +128,7 @@
             <div id="performance-chart" style="height: 400px;" />
           </el-card>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="8" class="radar-card-container">
           <el-card shadow="hover" class="chart-card">
             <div slot="header">
               <span><i class="el-icon-aim" /> Perfil Competitivo (Radar)</span>
@@ -128,7 +161,10 @@ export default {
   data() {
     return {
       selectedAtletaId: null,
+      selectedCategoriaId: '',
       atletas: [],
+      filteredAtletas: [],
+      categorias: [],
       atleta: {},
       tests: [],
       mediciones: [],
@@ -164,7 +200,7 @@ export default {
     }
   },
   async created() {
-    await this.loadAtletas()
+    await Promise.all([this.loadAtletas(), this.loadCategorias()])
     const queryId = this.$route.query.atleta_id
     if (queryId) {
       this.selectedAtletaId = parseInt(queryId)
@@ -181,11 +217,42 @@ export default {
       try {
         const response = await request({ url: '/atletas', method: 'get' })
         this.atletas = response || []
+        this.filteredAtletas = [...this.atletas].slice(0, 50)
       } catch (error) {
         console.error('Error cargando atletas:', error)
       }
     },
+    async loadCategorias() {
+      try {
+        const response = await request({ url: '/categoria', method: 'get' })
+        this.categorias = response || []
+      } catch (error) {
+        console.error('Error cargando categorías:', error)
+      }
+    },
+    filterAtletas(query) {
+      if (query !== '') {
+        this.filteredAtletas = this.atletas.filter(item => {
+          const fullName = (item.nombre + ' ' + item.apellido).toLowerCase()
+          return fullName.indexOf(query.toLowerCase()) > -1
+        }).slice(0, 20)
+      } else {
+        this.filteredAtletas = (this.selectedCategoriaId
+          ? this.atletas.filter(a => a.categoria_id === this.selectedCategoriaId)
+          : this.atletas
+        ).slice(0, 50)
+      }
+    },
+    handleCategoriaChange(val) {
+      this.selectedAtletaId = null
+      if (val) {
+        this.filteredAtletas = this.atletas.filter(a => a.categoria_id === val).slice(0, 50)
+      } else {
+        this.filteredAtletas = [...this.atletas].slice(0, 50)
+      }
+    },
     async handleAtletaChange(id) {
+      if (!id) return
       this.loading = true
       this.atleta = this.atletas.find(a => a.atleta_id === id) || {}
       try {
@@ -216,6 +283,7 @@ export default {
     initPerformanceChart() {
       const chartDom = document.getElementById('performance-chart')
       if (!chartDom) return
+      if (this.charts.performance) this.charts.performance.dispose()
       this.charts.performance = echarts.init(chartDom)
 
       const revertedTests = [...this.tests].reverse()
@@ -236,13 +304,14 @@ export default {
           { name: 'Resistencia', type: 'line', smooth: true, data: revertedTests.map(t => t.test_resistencia) },
           { name: 'Coordinación', type: 'line', smooth: true, data: revertedTests.map(t => t.test_coordinacion) }
         ],
-        color: ['#E51D22', '#2a5a8c', '#4CAF50', '#f39c12']
+        color: ['#E51D22', '#1a3a5f', '#4CAF50', '#f39c12']
       }
       this.charts.performance.setOption(option)
     },
     initRadarChart() {
       const chartDom = document.getElementById('radar-chart')
       if (!chartDom) return
+      if (this.charts.radar) this.charts.radar.dispose()
       this.charts.radar = echarts.init(chartDom)
 
       if (this.tests.length === 0) return
@@ -250,6 +319,8 @@ export default {
       const latest = this.tests[0]
       const option = {
         radar: {
+          center: ['50%', '50%'], /* Centrado interno absoluto */
+          radius: '65%',
           indicator: [
             { name: 'Fuerza', max: 100 },
             { name: 'Velocidad', max: 100 },
@@ -257,6 +328,12 @@ export default {
             { name: 'Coordinación', max: 100 },
             { name: 'Reacción', max: 100 }
           ],
+          name: {
+            textStyle: {
+              color: '#1a3a5f',
+              padding: [3, 5]
+            }
+          },
           splitArea: { show: false }
         },
         series: [{
@@ -280,6 +357,7 @@ export default {
     initAnthropometricChart() {
       const chartDom = document.getElementById('anthropometric-chart')
       if (!chartDom) return
+      if (this.charts.anthropometric) this.charts.anthropometric.dispose()
       this.charts.anthropometric = echarts.init(chartDom)
 
       const revertedMediciones = [...this.mediciones].reverse()
@@ -291,19 +369,47 @@ export default {
       const option = {
         tooltip: { trigger: 'axis' },
         legend: { data: ['Peso (kg)', 'Altura (cm)', 'IMC'] },
-        xAxis: { type: 'category', data: dates },
+        grid: {
+          left: '10%', /* Márgenes equilibrados para centrar */
+          right: '10%',
+          bottom: '15%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          data: dates,
+          axisLabel: { rotate: 30 }
+        },
         yAxis: [
-          { type: 'value', name: 'Kg/Cm' },
-          { type: 'value', name: 'IMC', position: 'right' }
+          { type: 'value', name: 'Kg/Cm', axisLine: { show: true }},
+          { type: 'value', name: 'IMC', position: 'right', axisLine: { show: true }}
         ],
         series: [
           { name: 'Peso (kg)', type: 'bar', data: revertedMediciones.map(m => m.peso) },
           { name: 'Altura (cm)', type: 'line', data: revertedMediciones.map(m => m.altura) },
           { name: 'IMC', type: 'line', yAxisIndex: 1, data: revertedMediciones.map(m => m.indice_de_masa) }
         ],
-        color: ['#ff8c00', '#2a5a8c', '#4CAF50']
+        color: ['#f39c12', '#1a3a5f', '#4CAF50']
       }
       this.charts.anthropometric.setOption(option)
+    },
+    printCurrentReport() {
+      this.$nextTick(() => {
+        Object.values(this.charts).forEach(chart => {
+          if (chart) {
+            chart.resize({
+              width: 800,
+              height: 320 /* Más compacto para que quepa en 2 hojas */
+            })
+          }
+        })
+        setTimeout(() => {
+          window.print()
+        }, 1000)
+      })
+    },
+    printCategoryReports() {
+      this.$message.info('Generando reportes masivos para la categoría...')
     }
   }
 }
@@ -317,38 +423,99 @@ export default {
 }
 
 .page-header {
-  background: linear-gradient(135deg, #1a3a5f, #2a5a8c);
+  background: linear-gradient(135deg, #E51D22, #c41a1d);
   color: white;
   padding: 20px;
   border-radius: 10px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 12px rgba(26, 58, 95, 0.2);
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(229, 29, 34, 0.2);
 }
 
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.page-header h1 {
+.header-content h1 {
   font-size: 1.8rem;
   margin: 0;
+  font-weight: 700;
 }
 
 .subtitle {
-  opacity: 0.8;
+  opacity: 0.9;
   margin: 5px 0 0;
 }
 
+.control-panel {
+  margin-bottom: 30px;
+  border-radius: 10px;
+  border-bottom: 3px solid #E51D22;
+}
+
+.control-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.control-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-right: 10px;
+}
+
+.search-section, .filter-section {
+  display: flex;
+  align-items: center;
+}
+
+.compact-search {
+  width: 250px;
+}
+
+.compact-select {
+  width: 180px;
+}
+
+.atleta-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.option-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.option-avatar-placeholder {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.option-tag {
+  margin-left: auto;
+}
+
+.empty-layout {
+  padding: 40px 0;
+}
+
 .empty-card {
-  padding: 80px 20px;
   text-align: center;
+  padding: 60px 20px;
 }
 
 .empty-state i {
   font-size: 4rem;
-  color: #ddd;
+  color: #eee;
   margin-bottom: 20px;
 }
 
@@ -364,15 +531,16 @@ export default {
 }
 
 .athlete-avatar {
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background-color: #eee;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 2.5rem;
   overflow: hidden;
+  border: 3px solid #f8d7da;
 }
 
 .avatar-img {
@@ -383,7 +551,8 @@ export default {
 
 .athlete-details h2 {
   margin: 0 0 8px 0;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
+  color: #1a3a5f;
 }
 
 .tags {
@@ -403,14 +572,16 @@ export default {
 }
 
 .stat-mini .label {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .stat-mini .value {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  color: #1e293b;
+  color: #E51D22;
 }
 
 .stat-cards {
@@ -419,7 +590,13 @@ export default {
 
 .trend-card {
   text-align: center;
-  padding: 10px;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+}
+
+.trend-card:hover {
+  transform: translateY(-5px);
+  border-color: #E51D22;
 }
 
 .trend-label {
@@ -429,15 +606,15 @@ export default {
 }
 
 .trend-value {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: #1e293b;
+  color: #1a3a5f;
   margin-bottom: 5px;
 }
 
 .trend-percentage {
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 700;
+  font-size: 0.95rem;
 }
 
 .trend-percentage.up {
@@ -450,10 +627,129 @@ export default {
 
 .chart-card {
   border-radius: 12px;
+  margin-bottom: 20px;
 }
 
 .chart-card [slot="header"] {
   font-weight: 600;
-  color: #1e293b;
+  color: #1a3a5f;
+  font-size: 1.1rem;
+}
+</style>
+
+<!-- Estilos globales para impresión -->
+<style>
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .sidebar-container, .navbar, .tags-view-container, .fixed-header, .drawer-bg, .page-header, .control-panel, .actions-section {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .main-container, .app-main, .progress-container {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    float: none !important;
+    display: block !important;
+    background: white !important;
+  }
+
+  .printable-area {
+    width: 100% !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 20px !important;
+  }
+
+  .el-row {
+    display: block !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .el-col {
+    width: 100% !important;
+    float: none !important;
+    padding: 0 !important;
+    margin: 0 0 25px 0 !important;
+    display: block !important;
+  }
+
+  .el-card {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    break-inside: avoid !important;
+    width: 100% !important;
+    margin-bottom: 30px !important;
+  }
+
+  .el-card__header {
+    background-color: #f8f9fa !important;
+    border-bottom: 2px solid #E51D22 !important;
+  }
+
+  /* Centrado forzado de gráficas mediante tamaño fijo y margen auto */
+  #performance-chart, #radar-chart, #anthropometric-chart {
+    width: 800px !important;
+    height: 320px !important;
+    margin: 0 auto !important;
+    display: block !important;
+  }
+
+  /* FORZAR REPORTE A 2 PÁGINAS */
+  .athlete-summary-card {
+    margin-bottom: 10px !important;
+    padding: 10px !important;
+  }
+
+  .summary-content {
+    gap: 15px !important;
+  }
+
+  .stat-cards {
+    margin-bottom: 10px !important;
+  }
+
+  .trend-card {
+    padding: 5px !important;
+  }
+
+  .trend-value {
+    font-size: 1.5rem !important;
+  }
+
+  /* El salto de página SOLO antes del Radar para dividir 1 y 2 */
+  .radar-card-container {
+    page-break-before: always !important;
+  }
+
+  /* Asegurar que el resto no salte página */
+  .athlete-summary-card, .stat-cards, .performance-evolution-column {
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .stat-cards {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    margin-bottom: 20px !important;
+  }
+
+  .stat-cards .el-col {
+    width: 45% !important;
+    margin: 2% !important;
+    display: inline-block !important;
+  }
 }
 </style>
