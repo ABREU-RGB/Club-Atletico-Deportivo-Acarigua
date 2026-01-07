@@ -23,7 +23,7 @@ const getTests = async (req, res) => {
       params.push(atleta_id);
     }
 
-    query += ' ORDER BY t.fecha_test DESC, atl.nombre ASC';
+    query += ' ORDER BY t.fecha_test DESC, t.test_id DESC, atl.nombre ASC';
 
     const [rows] = await pool.execute(query, params);
     res.json(rows);
@@ -43,7 +43,7 @@ const getTestsByAtleta = async (req, res) => {
        FROM test_de_rendimiento t
        LEFT JOIN atletas atl ON t.atleta_id = atl.atleta_id
        WHERE t.atleta_id = ? AND atl.estatus IN ('ACTIVO', 'LESIONADO')
-       ORDER BY t.fecha_test DESC`,
+       ORDER BY t.fecha_test DESC, t.test_id DESC`,
       [atleta_id]
     );
 
@@ -135,7 +135,7 @@ const getUltimoTest = async (req, res) => {
       `SELECT *
        FROM test_de_rendimiento 
        WHERE atleta_id = ?
-       ORDER BY fecha_test DESC
+       ORDER BY fecha_test DESC, test_id DESC
        LIMIT 1`,
       [atleta_id]
     );

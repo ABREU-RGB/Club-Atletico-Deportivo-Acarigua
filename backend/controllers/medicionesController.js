@@ -23,7 +23,7 @@ const getMediciones = async (req, res) => {
       params.push(atleta_id);
     }
 
-    query += ' ORDER BY m.fecha_medicion DESC, atl.nombre ASC';
+    query += ' ORDER BY m.fecha_medicion DESC, m.medidas_id DESC, atl.nombre ASC';
 
     const [rows] = await pool.execute(query, params);
     res.json(rows);
@@ -44,7 +44,7 @@ const getMedicionesByAtleta = async (req, res) => {
        FROM medidas_antropometricas m
        LEFT JOIN atletas atl ON m.atleta_id = atl.atleta_id
        WHERE m.atleta_id = ? AND atl.estatus IN ('ACTIVO', 'LESIONADO')
-       ORDER BY m.fecha_medicion DESC`,
+       ORDER BY m.fecha_medicion DESC, m.medidas_id DESC`,
       [atleta_id]
     );
 
@@ -104,7 +104,7 @@ const getUltimaMedicion = async (req, res) => {
       `SELECT m.*
        FROM medidas_antropometricas m
        WHERE m.atleta_id = ?
-       ORDER BY m.fecha_medicion DESC
+       ORDER BY m.fecha_medicion DESC, m.medidas_id DESC
        LIMIT 1`,
       [atleta_id]
     );

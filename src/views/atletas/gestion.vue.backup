@@ -1,0 +1,920 @@
+<template>
+  <div class="atletas-gestion-container">
+    <!-- Encabezado -->
+    <el-card class="header-card">
+      <div class="header-content">
+        <div>
+          <h1><i class="el-icon-s-custom" /> Club Deportivo Acarigua</h1>
+          <p class="subtitle">Sistema de Gestión de Atletas</p>
+        </div>
+        <el-button type="primary" icon="el-icon-plus" @click="openAddModal">
+          Agregar Atleta
+        </el-button>
+      </div>
+    </el-card>
+
+    <!-- Contenido Principal -->
+    <el-row :gutter="20" class="main-content">
+      <!-- Sidebar - Lista de Atletas -->
+      <el-col :xs="24" :sm="24" :md="8" :lg="6">
+        <el-card class="sidebar-card">
+          <div slot="header">
+            <i class="el-icon-user" /> Lista de Atletas
+          </div>
+
+          <!-- Búsqueda -->
+          <el-input
+            v-model="searchQuery"
+            prefix-icon="el-icon-search"
+            placeholder="Buscar atleta..."
+            clearable
+            class="search-input"
+          />
+
+          <!-- Lista de Atletas -->
+          <div v-loading="loadingAtletas" class="athlete-list">
+            <div
+              v-for="atleta in atletasFiltrados"
+              :key="atleta.atleta_id"
+              :class="['athlete-item', { active: currentAtletaId === atleta.atleta_id }]"
+              @click="selectAtleta(atleta.atleta_id)"
+            >
+              <div class="athlete-photo">
+                <i class="el-icon-user" />
+              </div>
+              <div class="athlete-info">
+                <h3>{{ atleta.nombre }} {{ atleta.apellido }}</h3>
+                <p>{{ atleta.posicion_de_juego || 'Sin posición' }}</p>
+                <p>{{ atleta.categoria_nombre || 'Sin categoría' }}</p>
+                <p v-if="atleta.edad">{{ atleta.edad }} años</p>
+              </div>
+            </div>
+
+            <!-- Estado vacío -->
+            <div v-if="atletasFiltrados.length === 0" class="empty-list">
+              <i class="el-icon-user-solid" />
+              <p>No hay atletas registrados</p>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+
+      <!-- Área de Detalles -->
+      <el-col :xs="24" :sm="24" :md="16" :lg="18">
+        <el-card class="content-card">
+          <!-- Estado vacío -->
+          <div v-if="!currentAtleta" class="empty-state">
+            <i class="el-icon-user-solid" />
+            <h3>No hay atleta seleccionado</h3>
+            <p>Selecciona un atleta de la lista o agrega uno nuevo para ver sus detalles.</p>
+          </div>
+
+          <!-- Detalles del Atleta -->
+          <div v-else>
+            <!-- Cabecera del Atleta -->
+            <div class="athlete-header">
+              <div class="athlete-header-info">
+                <div class="athlete-avatar">
+                  <i class="el-icon-user" />
+                </div>
+                <div class="athlete-details">
+                  <h2>{{ currentAtleta.nombre }} {{ currentAtleta.apellido }}</h2>
+                  <p>Categoría: {{ currentAtleta.categoria_nombre || 'Sin categoría' }}</p>
+                  <p v-if="currentAtleta.edad">Edad: {{ currentAtleta.edad }} años</p>
+                </div>
+              </div>
+              <div class="athlete-actions">
+                <el-button type="danger" icon="el-icon-delete" @click="confirmDelete">
+                  Eliminar
+                </el-button>
+                <el-button type="primary" icon="el-icon-edit" @click="openEditModal">
+                  Editar
+                </el-button>
+              </div>
+            </div>
+
+            <!-- Pestañas -->
+            <el-tabs v-model="activeTab" class="athlete-tabs">
+              <!-- Datos Personales -->
+              <el-tab-pane label="Datos Personales" name="personal">
+                <el-row :gutter="20">
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Nombre</label>
+                      <p>{{ currentAtleta.nombre }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Apellido</label>
+                      <p>{{ currentAtleta.apellido }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Fecha de Nacimiento</label>
+                      <p>{{ formatDate(currentAtleta.fecha_nacimiento) }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Edad</label>
+                      <p>{{ currentAtleta.edad }} años</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Posición de Juego</label>
+                      <p>{{ currentAtleta.posicion_de_juego || 'No especificada' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Categoría</label>
+                      <p>{{ currentAtleta.categoria_nombre || 'Sin categoría' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Teléfono</label>
+                      <p>{{ currentAtleta.telefono || 'No registrado' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="16">
+                    <div class="info-item">
+                      <label>Dirección</label>
+                      <p>{{ currentAtleta.direccion || 'No registrada' }}</p>
+                    </div>
+                  </el-col>
+                </el-row>
+              </el-tab-pane>
+
+              <!-- Ficha Médica -->
+              <el-tab-pane label="Ficha Médica" name="medical">
+                <el-row :gutter="20">
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Grupo Sanguíneo</label>
+                      <p>{{ currentAtleta.grupo_sanguineo || 'No registrado' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Alergias</label>
+                      <p>{{ currentAtleta.alergias || 'Ninguna' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Medicamentos</label>
+                      <p>{{ currentAtleta.medicamentos || 'Ninguno' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24">
+                    <div class="info-item">
+                      <label>Lesiones Previas</label>
+                      <p>{{ currentAtleta.lesiones_previas || 'Ninguna' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24">
+                    <div class="info-item">
+                      <label>Observaciones Médicas</label>
+                      <p>{{ currentAtleta.observaciones_medicas || 'Sin observaciones' }}</p>
+                    </div>
+                  </el-col>
+                </el-row>
+              </el-tab-pane>
+
+              <!-- Medidas Antropométricas -->
+              <el-tab-pane label="Medidas Antropométricas" name="anthropometric">
+                <el-row :gutter="20">
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Estatura (cm)</label>
+                      <p>{{ currentAtleta.estatura || 'No registrada' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Peso (kg)</label>
+                      <p>{{ currentAtleta.peso || 'No registrado' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>IMC</label>
+                      <p>{{ currentAtleta.imc || calcularIMC(currentAtleta.peso, currentAtleta.estatura) }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>% Grasa Corporal</label>
+                      <p>{{ currentAtleta.porcentaje_grasa ? currentAtleta.porcentaje_grasa + '%' : 'No registrado' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Circunferencia Muslo (cm)</label>
+                      <p>{{ currentAtleta.circunferencia_muslo || 'No registrada' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Circunferencia Pantorrilla (cm)</label>
+                      <p>{{ currentAtleta.circunferencia_pantorrilla || 'No registrada' }}</p>
+                    </div>
+                  </el-col>
+                </el-row>
+              </el-tab-pane>
+
+              <!-- Rendimiento -->
+              <el-tab-pane label="Rendimiento" name="performance">
+                <el-row :gutter="20">
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="performance-card">
+                      <h4>Velocidad 30m (s)</h4>
+                      <p>{{ currentAtleta.velocidad_30m || '-' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="performance-card">
+                      <h4>Salto Vertical (cm)</h4>
+                      <p>{{ currentAtleta.salto_vertical || '-' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="performance-card">
+                      <h4>Test de Cooper (m)</h4>
+                      <p>{{ currentAtleta.test_cooper || '-' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="performance-card">
+                      <h4>Fuerza en Piernas (kg)</h4>
+                      <p>{{ currentAtleta.fuerza_piernas || '-' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="performance-card">
+                      <h4>Agilidad (s)</h4>
+                      <p>{{ currentAtleta.agilidad || '-' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="performance-card">
+                      <h4>VO2 Máx (ml/kg/min)</h4>
+                      <p>{{ currentAtleta.vo2_max || '-' }}</p>
+                    </div>
+                  </el-col>
+                </el-row>
+              </el-tab-pane>
+
+              <!-- Otros Datos -->
+              <el-tab-pane label="Otros Datos" name="other">
+                <el-row :gutter="20">
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Representante/Tutor</label>
+                      <p>{{ currentAtleta.tutor_nombre || 'No registrado' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Teléfono de Contacto</label>
+                      <p>{{ currentAtleta.tutor_telefono || 'No registrado' }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Fecha de Ingreso</label>
+                      <p>{{ formatDate(currentAtleta.created_at) }}</p>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24" :sm="12" :md="8">
+                    <div class="info-item">
+                      <label>Estado</label>
+                      <el-tag :type="getStatusType(currentAtleta.estatus)">
+                        {{ currentAtleta.estatus }}
+                      </el-tag>
+                    </div>
+                  </el-col>
+                  <el-col :xs="24">
+                    <div class="info-item">
+                      <label>Observaciones Generales</label>
+                      <p>{{ currentAtleta.observaciones_generales || 'Sin observaciones' }}</p>
+                    </div>
+                  </el-col>
+                </el-row>
+              </el-tab-pane>
+            </el-tabs>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- Modal Agregar/Editar Atleta -->
+    <el-dialog
+      :title="isEditing ? 'Editar Atleta' : 'Agregar Nuevo Atleta'"
+      :visible.sync="modalVisible"
+      width="90%"
+      :close-on-click-modal="false"
+      @close="resetForm"
+    >
+      <el-form
+        ref="atletaForm"
+        :model="form"
+        :rules="rules"
+        label-position="top"
+      >
+        <el-row :gutter="20">
+          <el-col :xs="24" :sm="12" :md="8">
+            <el-form-item label="Nombre" prop="nombre">
+              <el-input v-model="form.nombre" placeholder="Nombre del atleta" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="8">
+            <el-form-item label="Apellido" prop="apellido">
+              <el-input v-model="form.apellido" placeholder="Apellido del atleta" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="8">
+            <el-form-item label="Fecha de Nacimiento" prop="fecha_nacimiento">
+              <el-date-picker
+                v-model="form.fecha_nacimiento"
+                type="date"
+                placeholder="Seleccionar fecha"
+                value-format="yyyy-MM-dd"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="8">
+            <el-form-item label="Teléfono">
+              <el-input v-model="form.telefono" placeholder="Teléfono de contacto" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="8">
+            <el-form-item label="Posición de Juego" prop="posicion_de_juego">
+              <el-select v-model="form.posicion_de_juego" placeholder="Seleccionar" style="width: 100%">
+                <el-option label="Portero" value="Portero" />
+                <el-option label="Defensa Central" value="Defensa Central" />
+                <el-option label="Lateral Derecho" value="Lateral Derecho" />
+                <el-option label="Lateral Izquierdo" value="Lateral Izquierdo" />
+                <el-option label="Mediocampista Defensivo" value="Mediocampista Defensivo" />
+                <el-option label="Mediocampista Central" value="Mediocampista Central" />
+                <el-option label="Mediocampista Ofensivo" value="Mediocampista Ofensivo" />
+                <el-option label="Extremo Derecho" value="Extremo Derecho" />
+                <el-option label="Extremo Izquierdo" value="Extremo Izquierdo" />
+                <el-option label="Delantero Centro" value="Delantero Centro" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="8">
+            <el-form-item label="Categoría" prop="categoria_id">
+              <el-select
+                v-model="form.categoria_id"
+                placeholder="Seleccionar categoría"
+                filterable
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="cat in categorias"
+                  :key="cat.categoria_id"
+                  :label="cat.nombre_categoria"
+                  :value="cat.categoria_id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24">
+            <el-form-item label="Dirección">
+              <el-input v-model="form.direccion" placeholder="Dirección completa" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="modalVisible = false">Cancelar</el-button>
+        <el-button type="primary" :loading="saving" @click="submitForm">
+          {{ isEditing ? 'Actualizar Atleta' : 'Guardar Atleta' }}
+        </el-button>
+      </span>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import { getAtletas, getAtletaById, createAtleta, updateAtleta, deleteAtleta } from '@/api/atletas'
+import { getCategorias } from '@/api/categorias'
+
+export default {
+  name: 'GestionAtletas',
+  data() {
+    return {
+      atletas: [],
+      categorias: [],
+      currentAtletaId: null,
+      currentAtleta: null,
+      searchQuery: '',
+      activeTab: 'personal',
+      modalVisible: false,
+      isEditing: false,
+      loadingAtletas: false,
+      saving: false,
+      form: {
+        nombre: '',
+        apellido: '',
+        telefono: '',
+        direccion: '',
+        fecha_nacimiento: '',
+        posicion_de_juego: '',
+        categoria_id: '',
+        tutor_id: null,
+        estatus: 'ACTIVO'
+      },
+      rules: {
+        nombre: [{ required: true, message: 'El nombre es requerido', trigger: 'blur' }],
+        apellido: [{ required: true, message: 'El apellido es requerido', trigger: 'blur' }],
+        fecha_nacimiento: [{ required: true, message: 'La fecha de nacimiento es requerida', trigger: 'change' }],
+        posicion_de_juego: [{ required: true, message: 'La posición es requerida', trigger: 'change' }],
+        categoria_id: [{ required: true, message: 'La categoría es requerida', trigger: 'change' }]
+      }
+    }
+  },
+  computed: {
+    atletasFiltrados() {
+      if (!this.searchQuery) {
+        return this.atletas
+      }
+      const query = this.searchQuery.toLowerCase()
+      return this.atletas.filter(atleta => {
+        const nombre = `${atleta.nombre} ${atleta.apellido}`.toLowerCase()
+        return nombre.includes(query)
+      })
+    }
+  },
+  created() {
+    this.fetchAtletas()
+    this.fetchCategorias()
+  },
+  methods: {
+    async fetchAtletas() {
+      this.loadingAtletas = true
+      try {
+        const response = await getAtletas()
+        this.atletas = response
+      } catch (error) {
+        this.$message.error('Error al cargar atletas')
+        console.error('Error fetching atletas:', error)
+      } finally {
+        this.loadingAtletas = false
+      }
+    },
+    async fetchCategorias() {
+      try {
+        const response = await getCategorias()
+        this.categorias = response
+      } catch (error) {
+        this.$message.error('Error al cargar categorías')
+        console.error('Error fetching categorias:', error)
+      }
+    },
+    async selectAtleta(id) {
+      this.currentAtletaId = id
+      try {
+        const response = await getAtletaById(id)
+        this.currentAtleta = response
+        this.activeTab = 'personal'
+      } catch (error) {
+        this.$message.error('Error al cargar detalles del atleta')
+        console.error('Error fetching atleta:', error)
+      }
+    },
+    openAddModal() {
+      this.isEditing = false
+      this.modalVisible = true
+      this.resetForm()
+    },
+    openEditModal() {
+      if (!this.currentAtleta) return
+      this.isEditing = true
+      this.form = {
+        nombre: this.currentAtleta.nombre,
+        apellido: this.currentAtleta.apellido,
+        telefono: this.currentAtleta.telefono || '',
+        direccion: this.currentAtleta.direccion || '',
+        fecha_nacimiento: this.currentAtleta.fecha_nacimiento,
+        posicion_de_juego: this.currentAtleta.posicion_de_juego || '',
+        categoria_id: this.currentAtleta.categoria_id,
+        tutor_id: this.currentAtleta.tutor_id || null,
+        estatus: this.currentAtleta.estatus || 'ACTIVO'
+      }
+      this.modalVisible = true
+    },
+    submitForm() {
+      this.$refs.atletaForm.validate(async(valid) => {
+        if (!valid) return
+
+        this.saving = true
+        try {
+          if (this.isEditing) {
+            await updateAtleta(this.currentAtletaId, this.form)
+            this.$message.success('Atleta actualizado correctamente')
+            await this.selectAtleta(this.currentAtletaId)
+          } else {
+            await createAtleta(this.form)
+            this.$message.success('Atleta creado correctamente')
+          }
+          await this.fetchAtletas()
+          this.modalVisible = false
+          this.resetForm()
+        } catch (error) {
+          const errorMsg = error.response?.data?.error || 'Error al guardar atleta'
+          this.$message.error(errorMsg)
+          console.error('Error saving atleta:', error)
+        } finally {
+          this.saving = false
+        }
+      })
+    },
+    confirmDelete() {
+      if (!this.currentAtleta) return
+
+      this.$confirm('¿Está seguro de eliminar este atleta?', 'Confirmar eliminación', {
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar',
+        type: 'warning'
+      }).then(async() => {
+        try {
+          await deleteAtleta(this.currentAtletaId)
+          this.$message.success('Atleta eliminado correctamente')
+          this.currentAtleta = null
+          this.currentAtletaId = null
+          await this.fetchAtletas()
+        } catch (error) {
+          this.$message.error('Error al eliminar atleta')
+          console.error('Error deleting atleta:', error)
+        }
+      }).catch(() => {
+        // Cancelado
+      })
+    },
+    resetForm() {
+      this.form = {
+        nombre: '',
+        apellido: '',
+        telefono: '',
+        direccion: '',
+        fecha_nacimiento: '',
+        posicion_de_juego: '',
+        categoria_id: '',
+        tutor_id: null,
+        estatus: 'ACTIVO'
+      }
+      if (this.$refs.atletaForm) {
+        this.$refs.atletaForm.clearValidate()
+      }
+    },
+    formatDate(dateStr) {
+      if (!dateStr) return 'No registrada'
+      const date = new Date(dateStr)
+      return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })
+    },
+    calcularIMC(peso, estatura) {
+      if (!peso || !estatura) return 'No calculado'
+      const imc = peso / Math.pow(estatura / 100, 2)
+      return imc.toFixed(1)
+    },
+    getStatusType(estatus) {
+      const types = {
+        'ACTIVO': 'success',
+        'LESIONADO': 'warning',
+        'INACTIVO': 'info'
+      }
+      return types[estatus] || 'info'
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.atletas-gestion-container {
+  padding: 20px;
+  background-color: #f1f5f9;
+  min-height: 100vh;
+}
+
+.header-card {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+
+  ::v-deep .el-card__body {
+    padding: 20px;
+    background: linear-gradient(135deg, #E51D22 0%, #c41a1d 100%);
+    color: white;
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+  }
+}
+
+.main-content {
+  margin-top: 20px;
+}
+
+.sidebar-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+
+  ::v-deep .el-card__header {
+    background-color: #f5f7fa;
+    border-bottom: 2px solid #E51D22;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  ::v-deep .el-card__body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+  }
+
+  .search-input {
+    margin-bottom: 15px;
+  }
+
+  .athlete-list {
+    flex: 1;
+    overflow-y: auto;
+    margin: -15px;
+    padding: 15px;
+
+    .athlete-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      border-bottom: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background-color: #f8fafc;
+      }
+
+      &.active {
+        background-color: #fef2f2;
+        border-left: 4px solid #E51D22;
+      }
+
+      .athlete-photo {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #E51D22 0%, #c41a1d 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      .athlete-info {
+        flex: 1;
+
+        h3 {
+          font-size: 1rem;
+          font-weight: 600;
+          margin-bottom: 3px;
+          color: #1e293b;
+        }
+
+        p {
+          font-size: 0.85rem;
+          color: #64748b;
+          margin: 2px 0;
+        }
+      }
+    }
+
+    .empty-list {
+      text-align: center;
+      padding: 40px 20px;
+      color: #94a3b8;
+
+      i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        display: block;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+.content-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  min-height: calc(100vh - 200px);
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: #94a3b8;
+
+    i {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #64748b;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+  }
+
+  .athlete-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
+
+    .athlete-header-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      .athlete-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #E51D22 0%, #c41a1d 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+        flex-shrink: 0;
+      }
+
+      .athlete-details {
+        h2 {
+          font-size: 1.8rem;
+          font-weight: 700;
+          margin-bottom: 5px;
+          color: #1e293b;
+        }
+
+        p {
+          color: #64748b;
+          margin: 5px 0;
+        }
+      }
+    }
+
+    .athlete-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+
+      .athlete-header-info {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  }
+
+  .athlete-tabs {
+    ::v-deep .el-tabs__item {
+      font-weight: 600;
+
+      &.is-active {
+        color: #E51D22;
+      }
+    }
+
+    ::v-deep .el-tabs__active-bar {
+      background-color: #E51D22;
+    }
+  }
+
+  .info-item {
+    margin-bottom: 20px;
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    p {
+      font-size: 1rem;
+      color: #1e293b;
+      padding: 10px;
+      background-color: #f8fafc;
+      border-radius: 6px;
+      border-left: 3px solid #E51D22;
+    }
+  }
+
+  .performance-card {
+    background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 100%);
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #E51D22;
+    margin-bottom: 15px;
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(229, 29, 34, 0.15);
+    }
+
+    h4 {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    p {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #E51D22;
+    }
+  }
+}
+
+::v-deep .el-button--primary {
+  background-color: #E51D22;
+  border-color: #E51D22;
+
+  &:hover,
+  &:focus {
+    background-color: #c41a1d;
+    border-color: #c41a1d;
+  }
+}
+
+::v-deep .el-dialog__header {
+  background-color: #f5f7fa;
+  border-bottom: 2px solid #E51D22;
+}
+
+@media (max-width: 992px) {
+  .sidebar-card {
+    height: auto;
+    margin-bottom: 20px;
+
+    .athlete-list {
+      max-height: 400px;
+    }
+  }
+}
+</style>

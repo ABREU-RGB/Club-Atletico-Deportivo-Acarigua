@@ -3,14 +3,23 @@ const pool = require('../config/database');
 // Obtener todas las fichas médicas
 const getFichasMedicas = async (req, res) => {
     try {
-        const [rows] = await pool.execute(
-            `SELECT f.*, 
-              a.nombre as atleta_nombre,
-              a.apellido as atleta_apellido
+        const { atleta_id } = req.query;
+        let query = `SELECT f.*,
+    a.nombre as atleta_nombre,
+    a.apellido as atleta_apellido
        FROM ficha_medica f
-       LEFT JOIN atletas a ON f.atleta_id = a.atleta_id
-       ORDER BY f.created_at DESC`
-        );
+       LEFT JOIN atletas a ON f.atleta_id = a.atleta_id`;
+
+        const params = [];
+
+        if (atleta_id) {
+            query += ' WHERE f.atleta_id = ?';
+            params.push(atleta_id);
+        }
+
+        query += ' ORDER BY f.created_at DESC';
+
+        const [rows] = await pool.execute(query, params);
         res.json(rows);
     } catch (error) {
         console.error('Error obteniendo fichas médicas:', error);
@@ -24,12 +33,12 @@ const getFichaMedicaByAtleta = async (req, res) => {
         const { atleta_id } = req.params;
 
         const [rows] = await pool.execute(
-            `SELECT f.*, 
-              a.nombre as atleta_nombre,
-              a.apellido as atleta_apellido
+            `SELECT f.*,
+    a.nombre as atleta_nombre,
+    a.apellido as atleta_apellido
        FROM ficha_medica f
        LEFT JOIN atletas a ON f.atleta_id = a.atleta_id
-       WHERE f.atleta_id = ?`,
+       WHERE f.atleta_id = ? `,
             [atleta_id]
         );
 
@@ -67,9 +76,9 @@ const createFichaMedica = async (req, res) => {
         }
 
         const [result] = await pool.execute(
-            `INSERT INTO ficha_medica 
-       (atleta_id, alergias, tipo_sanguineo, lesion, condicion_medica, observacion) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO ficha_medica
+    (atleta_id, alergias, tipo_sanguineo, lesion, condicion_medica, observacion)
+VALUES(?, ?, ?, ?, ?, ?)`,
             [atleta_id, alergias, tipo_sanguineo, lesion, condicion_medica, observacion]
         );
 
@@ -99,7 +108,7 @@ const updateFichaMedica = async (req, res) => {
         const [result] = await pool.execute(
             `UPDATE ficha_medica 
        SET alergias = ?, tipo_sanguineo = ?, lesion = ?, condicion_medica = ?, observacion = ?
-       WHERE ficha_id = ?`,
+    WHERE ficha_id = ? `,
             [alergias, tipo_sanguineo, lesion, condicion_medica, observacion, id]
         );
 
