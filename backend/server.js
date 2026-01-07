@@ -12,6 +12,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
+app.use('/uploads', express.static('public/uploads'));
 
 // Importar rutas existentes
 const usuariosRoutes = require('./routes/usuarios');

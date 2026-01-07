@@ -18,8 +18,49 @@
       <!-- Sidebar con lista de atletas -->
       <aside class="sidebar">
         <el-card shadow="hover">
-          <div slot="header">
-            <i class="el-icon-user" /> Lista de Atletas
+          <div slot="header" class="sidebar-header">
+            <span><i class="el-icon-user" /> Lista de Atletas</span>
+            <el-popover
+              placement="bottom-end"
+              width="250"
+              trigger="click"
+            >
+              <div class="filter-popover">
+                <h4>Filtros Avanzados</h4>
+                <div class="filter-item">
+                  <label>Categoría</label>
+                  <el-select v-model="filterCategoria" placeholder="Todas" clearable size="small" style="width: 100%">
+                    <el-option
+                      v-for="cat in categorias"
+                      :key="cat.categoria_id"
+                      :label="cat.nombre_categoria"
+                      :value="cat.categoria_id"
+                    />
+                  </el-select>
+                </div>
+                <div class="filter-item">
+                  <label>Estatus</label>
+                  <el-select v-model="filterEstatus" placeholder="Predeterminado" clearable size="small" style="width: 100%">
+                    <el-option label="Activos / Lesionados" value="" />
+                    <el-option label="Activo" value="ACTIVO" />
+                    <el-option label="Inactivo" value="INACTIVO" />
+                    <el-option label="Lesionado" value="LESIONADO" />
+                    <el-option label="Suspendido" value="SUSPENDIDO" />
+                    <el-option label="Ver Todos" value="TODOS" />
+                  </el-select>
+                </div>
+              </div>
+              <el-button slot="reference" type="text" icon="el-icon-s-operation" class="filter-btn" />
+            </el-popover>
+          </div>
+          <div class="search-container">
+            <el-input
+              v-model="searchQuery"
+              placeholder="Buscar por nombre..."
+              prefix-icon="el-icon-search"
+              size="small"
+              clearable
+            />
           </div>
           <div class="athlete-list">
             <div
@@ -30,7 +71,8 @@
               @click="selectAtleta(atleta.atleta_id)"
             >
               <div class="athlete-photo">
-                <i class="el-icon-user" />
+                <img v-if="atleta.foto" :src="getFotoUrl(atleta.foto)" class="avatar-img">
+                <i v-else class="el-icon-user" />
               </div>
               <div class="athlete-info">
                 <h3>{{ atleta.nombre }} {{ atleta.apellido }}</h3>
@@ -59,7 +101,8 @@
           <!-- Encabezado del atleta -->
           <div class="athlete-details-header">
             <div class="athlete-details-photo">
-              <i class="el-icon-user" />
+              <img v-if="currentAtleta.foto" :src="getFotoUrl(currentAtleta.foto)" class="avatar-img-large">
+              <i v-else class="el-icon-user" />
             </div>
             <div class="athlete-details-info">
               <h2>{{ currentAtleta.nombre }} {{ currentAtleta.apellido }}</h2>
@@ -113,6 +156,10 @@
                 <div class="form-item">
                   <label>Estatus</label>
                   <el-tag :type="getStatusType(currentAtleta.estatus)">{{ currentAtleta.estatus }}</el-tag>
+                </div>
+                <div class="form-item">
+                  <label>Pierna Dominante</label>
+                  <p>{{ currentAtleta.pierna_dominante || 'Derecha' }}</p>
                 </div>
                 <div class="form-item full-width">
                   <label>Dirección</label>
@@ -271,6 +318,22 @@
       :close-on-click-modal="false"
     >
       <el-form ref="atletaForm" :model="atletaForm" :rules="atletaRules" label-position="top">
+        <div class="photo-upload-container">
+          <el-upload
+            class="avatar-uploader"
+            :action="backendUrl + '/api/atletas/upload'"
+            :show-file-list="false"
+            :on-success="handleUploadSuccess"
+            :before-upload="beforeAvatarUpload"
+            name="foto"
+          >
+            <img v-if="atletaForm.foto" :src="getFotoUrl(atletaForm.foto)" class="avatar-preview">
+            <div v-else class="avatar-uploader-icon">
+              <i class="el-icon-plus" />
+              <span>Subir Foto</span>
+            </div>
+          </el-upload>
+        </div>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Nombre" prop="nombre">
@@ -298,6 +361,7 @@
           <el-col :span="12">
             <el-form-item label="Posición de Juego">
               <el-select v-model="atletaForm.posicion_de_juego" placeholder="Seleccionar" style="width: 100%">
+                <el-option label="Sin definir" value="" />
                 <el-option label="Portero" value="Portero" />
                 <el-option label="Defensa Central" value="Defensa Central" />
                 <el-option label="Lateral Derecho" value="Lateral Derecho" />
@@ -337,7 +401,12 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Teléfono">
-              <el-input v-model="atletaForm.telefono" placeholder="Teléfono (opcional)" />
+              <el-input
+                v-model="atletaForm.telefono"
+                placeholder="Ej: 04141234567"
+                maxlength="11"
+                @input="v => atletaForm.telefono = v.replace(/\D/g, '')"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -347,6 +416,17 @@
                 <el-option label="INACTIVO" value="INACTIVO" />
                 <el-option label="LESIONADO" value="LESIONADO" />
                 <el-option label="SUSPENDIDO" value="SUSPENDIDO" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Pierna Dominante">
+              <el-select v-model="atletaForm.pierna_dominante" placeholder="Seleccionar" style="width: 100%">
+                <el-option label="Derecha" value="Derecha" />
+                <el-option label="Izquierda" value="Izquierda" />
+                <el-option label="Ambidiestro" value="Ambidiestro" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -539,7 +619,12 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Teléfono">
-              <el-input v-model="tutorForm.telefono" placeholder="Teléfono de contacto" />
+              <el-input
+                v-model="tutorForm.telefono"
+                placeholder="Ej: 04141234567"
+                maxlength="11"
+                @input="v => tutorForm.telefono = v.replace(/\D/g, '')"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -588,6 +673,8 @@ export default {
       tutor: null,
       activeTab: 'personal',
       loading: false,
+      loadingAtletas: false,
+      backendUrl: 'http://localhost:3000',
 
       // Modales
       showAtletaModal: false,
@@ -600,6 +687,12 @@ export default {
       isEditingAtleta: false,
       isEditingTutor: false,
 
+      // Filtros y búsqueda
+      searchQuery: '',
+      filterCategoria: '',
+      filterEstatus: '', // "" significa por defecto (Activos/Lesionados)
+      searchTimeout: null,
+
       // Formularios
       atletaForm: {
         nombre: '',
@@ -610,7 +703,9 @@ export default {
         tutor_id: null,
         telefono: '',
         direccion: '',
-        estatus: 'ACTIVO'
+        estatus: 'ACTIVO',
+        foto: null,
+        pierna_dominante: 'Derecha'
       },
       medicalForm: {
         tipo_sanguineo: '',
@@ -657,6 +752,20 @@ export default {
       }
     }
   },
+  watch: {
+    searchQuery() {
+      if (this.searchTimeout) clearTimeout(this.searchTimeout)
+      this.searchTimeout = setTimeout(() => {
+        this.loadAtletas()
+      }, 500)
+    },
+    filterCategoria() {
+      this.loadAtletas()
+    },
+    filterEstatus() {
+      this.loadAtletas()
+    }
+  },
   created() {
     this.loadData()
   },
@@ -670,12 +779,24 @@ export default {
     },
 
     async loadAtletas() {
+      this.loadingAtletas = true // Asumiendo que agregaremos un pequeño spinner si es necesario
       try {
-        const response = await request({ url: '/atletas', method: 'get' })
+        const params = {}
+        if (this.searchQuery) params.search = this.searchQuery
+        if (this.filterCategoria) params.categoria_id = this.filterCategoria
+        if (this.filterEstatus) params.estatus = this.filterEstatus
+
+        const response = await request({
+          url: '/atletas',
+          method: 'get',
+          params
+        })
         this.atletas = Array.isArray(response) ? response : []
       } catch (error) {
         console.error('Error cargando atletas:', error)
         this.$message.error('Error al cargar atletas')
+      } finally {
+        this.loadingAtletas = false
       }
     },
 
@@ -697,15 +818,17 @@ export default {
       }
     },
 
-    async selectAtleta(id) {
+    async selectAtleta(id, keepTab = false) {
       this.currentAtletaId = id
       this.currentAtleta = this.atletas.find(a => a.atleta_id === id) || {}
-      this.activeTab = 'personal'
 
-      this.fichaMedica = null
-      this.medidas = []
-      this.tests = []
-      this.tutor = null
+      if (!keepTab) {
+        this.activeTab = 'personal'
+        this.fichaMedica = null
+        this.medidas = []
+        this.tests = []
+        this.tutor = null
+      }
 
       await Promise.all([
         this.loadFichaMedica(id),
@@ -787,7 +910,9 @@ export default {
           tutor_id: this.currentAtleta.tutor_id || null,
           telefono: this.currentAtleta.telefono || '',
           direccion: this.currentAtleta.direccion || '',
-          estatus: this.currentAtleta.estatus || 'ACTIVO'
+          estatus: this.currentAtleta.estatus || 'ACTIVO',
+          foto: this.currentAtleta.foto || '',
+          pierna_dominante: this.currentAtleta.pierna_dominante || 'Derecha'
         }
       } else {
         this.resetAtletaForm()
@@ -1028,7 +1153,7 @@ export default {
 
           this.showTutorModal = false
           await this.loadAtletas()
-          await this.selectAtleta(this.currentAtletaId)
+          await this.selectAtleta(this.currentAtletaId, true)
         } catch (error) {
           console.error('Error guardando tutor:', error)
           this.$message.error('Error al guardar tutor')
@@ -1070,7 +1195,9 @@ export default {
         tutor_id: null,
         telefono: '',
         direccion: '',
-        estatus: 'ACTIVO'
+        estatus: 'ACTIVO',
+        foto: null,
+        pierna_dominante: 'Derecha'
       }
     },
 
@@ -1149,6 +1276,29 @@ export default {
       if (!categoriaId || !this.categorias || this.categorias.length === 0) return 'No asignado'
       const categoria = this.categorias.find(c => c.categoria_id === categoriaId)
       return categoria ? (categoria.entrenador_nombre || categoria.nombre_entrenador || 'No asignado') : 'No asignado'
+    },
+
+    getFotoUrl(filename) {
+      if (!filename) return null
+      return `${this.backendUrl}/uploads/atletas/${filename}`
+    },
+
+    handleUploadSuccess(res) {
+      this.atletaForm.foto = res.filename
+      this.$message.success('Foto cargada exitosamente')
+    },
+
+    beforeAvatarUpload(file) {
+      const isJPGorPNG = file.type === 'image/jpeg' || file.type === 'image/png'
+      const isLt2M = file.size / 1024 / 1024 < 2
+
+      if (!isJPGorPNG) {
+        this.$message.error('La imagen debe estar en formato JPG o PNG')
+      }
+      if (!isLt2M) {
+        this.$message.error('La imagen no puede exceder los 2MB')
+      }
+      return isJPGorPNG && isLt2M
     }
   }
 }
@@ -1200,8 +1350,109 @@ export default {
 }
 
 .athlete-list {
-  max-height: calc(100vh - 280px);
+  max-height: calc(100vh - 340px);
   overflow-y: auto;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-container {
+  padding: 10px 15px;
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.filter-popover h4 {
+  margin: 0 0 15px 0;
+  font-size: 0.9rem;
+  color: #2c3e50;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.filter-item {
+  margin-bottom: 15px;
+}
+
+.filter-item label {
+  display: block;
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 5px;
+}
+
+.filter-btn {
+  font-size: 1.2rem;
+  color: #64748b;
+  padding: 0;
+}
+
+.filter-btn:hover {
+  color: #E51D22;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-img-large {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.photo-upload-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.avatar-uploader {
+  border: 2px dashed #d9d9d9;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  width: 120px;
+  height: 120px;
+  transition: border-color 0.3s;
+}
+
+.avatar-uploader:hover {
+  border-color: #E51D22;
+}
+
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 120px;
+  height: 120px;
+  line-height: 1.2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar-uploader-icon span {
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.avatar-preview {
+  width: 120px;
+  height: 120px;
+  display: block;
+  object-fit: cover;
 }
 
 .athlete-item {
@@ -1393,6 +1644,21 @@ export default {
 
 ::v-deep .el-tabs__item:hover {
   color: #E51D22;
+}
+
+::v-deep .el-tabs__content {
+  height: calc(100vh - 350px);
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+::v-deep .el-tabs__content::-webkit-scrollbar {
+  width: 8px;
+}
+
+::v-deep .el-tabs__content::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
 }
 
 @media (max-width: 1200px) {
