@@ -111,6 +111,7 @@
               <el-tag :type="getStatusType(currentAtleta.estatus)">{{ currentAtleta.estatus }}</el-tag>
             </div>
             <div class="athlete-actions">
+              <el-button type="info" icon="el-icon-data-line" @click="goToProgress">Análisis</el-button>
               <el-button type="danger" icon="el-icon-delete" @click="deleteAtleta">Eliminar</el-button>
               <el-button type="primary" icon="el-icon-edit" @click="handleEdit">Editar</el-button>
             </div>
@@ -1183,6 +1184,13 @@ export default {
           this.$message.error('Error al eliminar atleta')
         }
       }).catch(() => {})
+    },
+
+    goToProgress() {
+      this.$router.push({
+        path: '/reportes/rendimiento',
+        query: { atleta_id: this.currentAtletaId }
+      })
     },
 
     resetAtletaForm() {
