@@ -1,12 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const { getUsuarios, login, getInfo, logout, createUsuario } = require('../controllers/usuariosController');
+const { getUsuarios, getUsuarioById, login, getInfo, logout, createUsuario, updateUsuario, deleteUsuario } = require('../controllers/usuariosController');
 const { verifyToken } = require('../middleware/auth');
 
+// Rutas específicas PRIMERO (antes de las parametrizadas)
 router.get('/', getUsuarios);
 router.post('/login', login);
 router.get('/info', verifyToken, getInfo);
 router.post('/logout', verifyToken, logout);
 router.post('/', createUsuario);
+
+// Rutas con parámetros DESPUÉS
+router.get('/:id', getUsuarioById);
+router.put('/:id', updateUsuario);
+router.delete('/:id', deleteUsuario);
 
 module.exports = router;

@@ -289,7 +289,7 @@ export const constantRoutes = [
         path: 'permisos',
         component: () => import('@/views/configuracion/permisos'),
         name: 'PermisosRoles',
-        meta: { title: 'Permisos y Roles', icon: 'el-icon-lock' }
+        meta: { title: 'Gestión de Roles', icon: 'el-icon-lock' }
       },
       {
         path: 'club',

@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:9527', // O el puerto de tu Vue.js
+  origin: ['http://localhost:9527', 'http://localhost:9528'], // Permitir ambos puertos
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -29,6 +29,7 @@ const implementosRoutes = require('./routes/implementos');
 const pagosRoutes = require('./routes/pagos');
 const plantelRoutes = require('./routes/plantel');
 const tutorRoutes = require('./routes/tutor');
+const rolesRoutes = require('./routes/roles');
 
 // Usar rutas existentes
 app.use('/api/usuarios', usuariosRoutes);
@@ -45,6 +46,7 @@ app.use('/api/implementos', implementosRoutes);
 app.use('/api/pagos', pagosRoutes);
 app.use('/api/plantel', plantelRoutes);
 app.use('/api/tutor', tutorRoutes);
+app.use('/api/roles', rolesRoutes);
 
 // Ruta de prueba
 app.get('/api', (req, res) => {
@@ -64,7 +66,8 @@ app.get('/api', (req, res) => {
       implementos: '/api/implementos',
       pagos: '/api/pagos',
       plantel: '/api/plantel',
-      tutor: '/api/tutor'
+      tutor: '/api/tutor',
+      roles: '/api/roles'
     }
   });
 });
@@ -106,4 +109,5 @@ app.listen(PORT, () => {
   console.log('   - Pagos: /api/pagos');
   console.log('   - Plantel: /api/plantel');
   console.log('   - Tutores: /api/tutor');
+  console.log('   - Roles: /api/roles');
 });
