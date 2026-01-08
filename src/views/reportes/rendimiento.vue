@@ -16,6 +16,7 @@
         <div class="search-section">
           <label class="control-label"><i class="el-icon-search" /> Buscar Atleta:</label>
           <el-select
+            :key="searchKey"
             v-model="selectedAtletaId"
             filterable
             remote
@@ -170,6 +171,7 @@ export default {
       mediciones: [],
       loading: false,
       backendUrl: 'http://localhost:3000',
+      searchKey: 0, // Clave para forzar re-render del buscador
       charts: {
         performance: null,
         radar: null,
@@ -204,6 +206,19 @@ export default {
     const queryId = this.$route.query.atleta_id
     if (queryId) {
       this.selectedAtletaId = parseInt(queryId)
+      this.handleAtletaChange(this.selectedAtletaId)
+    }
+  },
+  async activated() {
+    // 1. Refrescamos la lista de atletas desde el servidor
+    await this.loadAtletas()
+
+    // 2. Incrementamos la clave para forzar al Buscador (el-select) a re-renderizarse
+    // Esto borra cualquier "cache" visual del nombre viejo en el campo
+    this.searchKey++
+
+    // 3. Si hay un atleta seleccionado, sincronizamos su ficha técnica
+    if (this.selectedAtletaId) {
       this.handleAtletaChange(this.selectedAtletaId)
     }
   },
@@ -254,8 +269,21 @@ export default {
     async handleAtletaChange(id) {
       if (!id) return
       this.loading = true
-      this.atleta = this.atletas.find(a => a.atleta_id === id) || {}
+
       try {
+        // Re-sincronizar datos básicos del atleta para asegurar que cambios recientes (foto/nombre) se vean
+        const currentAtleta = await request({ url: `/atletas?atleta_id=${id}`, method: 'get' })
+        if (currentAtleta) {
+          // Si el servidor devuelve un array (común en este backend), tomamos el primero
+          const updatedInfo = Array.isArray(currentAtleta) ? currentAtleta.find(a => a.atleta_id === id) : currentAtleta
+          if (updatedInfo) {
+            this.atleta = updatedInfo
+            // También actualizar en la lista local para el buscador
+            const idx = this.atletas.findIndex(a => a.atleta_id === id)
+            if (idx !== -1) this.$set(this.atletas, idx, updatedInfo)
+          }
+        }
+
         const [tests, mediciones] = await Promise.all([
           request({ url: `/tests?atleta_id=${id}`, method: 'get' }),
           request({ url: `/mediciones?atleta_id=${id}`, method: 'get' })
@@ -267,7 +295,8 @@ export default {
           this.initCharts()
         })
       } catch (error) {
-        this.$message.error('Error cargando datos del atleta')
+        console.error('Error sincronizando:', error)
+        this.$message.error('Error cargando datos actualizados')
       } finally {
         this.loading = false
       }
@@ -317,10 +346,21 @@ export default {
       if (this.tests.length === 0) return
 
       const latest = this.tests[0]
+      const first = this.tests[this.tests.length - 1]
+
       const option = {
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          data: ['Estado Actual', 'Estado Inicial'],
+          bottom: 0,
+          textStyle: { color: '#1a3a5f' }
+        },
         radar: {
-          center: ['50%', '50%'], /* Centrado interno absoluto */
-          radius: '65%',
+          center: ['50%', '45%'],
+          radius: '60%',
+          nameGap: 15,
           indicator: [
             { name: 'Fuerza', max: 100 },
             { name: 'Velocidad', max: 100 },
@@ -331,25 +371,41 @@ export default {
           name: {
             textStyle: {
               color: '#1a3a5f',
-              padding: [3, 5]
+              fontSize: 11,
+              padding: [5, 10]
             }
           },
           splitArea: { show: false }
         },
         series: [{
           type: 'radar',
-          data: [{
-            value: [
-              latest.test_de_fuerza,
-              latest.test_velocidad,
-              latest.test_resistencia,
-              latest.test_coordinacion,
-              latest.test_de_reaccion
-            ],
-            name: 'Estado Actual',
-            areaStyle: { color: 'rgba(229, 29, 34, 0.3)' },
-            itemStyle: { color: '#E51D22' }
-          }]
+          data: [
+            {
+              value: [
+                latest.test_de_fuerza,
+                latest.test_velocidad,
+                latest.test_resistencia,
+                latest.test_coordinacion,
+                latest.test_de_reaccion
+              ],
+              name: 'Estado Actual',
+              areaStyle: { color: 'rgba(229, 29, 34, 0.3)' },
+              itemStyle: { color: '#E51D22' }
+            },
+            {
+              value: [
+                first.test_de_fuerza,
+                first.test_velocidad,
+                first.test_resistencia,
+                first.test_coordinacion,
+                first.test_de_reaccion
+              ],
+              name: 'Estado Inicial',
+              areaStyle: { color: 'rgba(26, 58, 95, 0.1)' },
+              itemStyle: { color: '#1a3a5f' },
+              lineStyle: { type: 'dashed' }
+            }
+          ]
         }]
       }
       this.charts.radar.setOption(option)
@@ -408,8 +464,64 @@ export default {
         }, 1000)
       })
     },
-    printCategoryReports() {
-      this.$message.info('Generando reportes masivos para la categoría...')
+    async printCategoryReports() {
+      if (!this.selectedCategoriaId) return
+
+      this.loading = true
+      try {
+        const categoria = this.categorias.find(c => c.categoria_id === this.selectedCategoriaId)
+        const athletes = this.atletas.filter(a => a.categoria_id === this.selectedCategoriaId)
+
+        if (athletes.length === 0) {
+          this.$message.warning('No hay atletas en esta categoría')
+          return
+        }
+
+        // Obtener datos resumidos de todos los atletas de la categoría
+        const allData = await Promise.all(athletes.map(async(atleta) => {
+          const [tests, mediciones] = await Promise.all([
+            request({ url: `/tests?atleta_id=${atleta.atleta_id}`, method: 'get' }),
+            request({ url: `/mediciones?atleta_id=${atleta.atleta_id}`, method: 'get' })
+          ])
+          const latestTest = tests && tests.length > 0 ? tests[0] : {}
+          const latestMed = mediciones && mediciones.length > 0 ? mediciones[0] : {}
+
+          return {
+            nombre: `${atleta.nombre} ${atleta.apellido}`,
+            posicion: atleta.posicion_de_juego || 'N/A',
+            peso: latestMed.peso || '-',
+            altura: latestMed.altura || '-',
+            imc: latestMed.indice_de_masa || '-',
+            fuerza: latestTest.test_de_fuerza || '-',
+            velocidad: latestTest.test_velocidad || '-',
+            resistencia: latestTest.test_resistencia || '-',
+            coordinacion: latestTest.test_coordinacion || '-',
+            reaccion: latestTest.test_de_reaccion || '-'
+          }
+        }))
+
+        import('@/vendor/Export2Excel').then(excel => {
+          const tHeader = ['Nombre', 'Posición', 'Peso (kg)', 'Altura (cm)', 'IMC', 'Fuerza', 'Velocidad', 'Resistencia', 'Coordinación', 'Reacción']
+          const filterVal = ['nombre', 'posicion', 'peso', 'altura', 'imc', 'fuerza', 'velocidad', 'resistencia', 'coordinacion', 'reaccion']
+          const data = this.formatJson(filterVal, allData)
+          excel.export_json_to_excel({
+            header: tHeader,
+            data,
+            filename: `Reporte_Rendimiento_${categoria.nombre_categoria}_${new Date().toLocaleDateString()}`,
+            autoWidth: true,
+            bookType: 'xlsx'
+          })
+          this.$message.success('Reporte exportado exitosamente')
+        })
+      } catch (error) {
+        console.error('Error exportando categoría:', error)
+        this.$message.error('Error al generar reporte de categoría')
+      } finally {
+        this.loading = false
+      }
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v => filterVal.map(j => v[j]))
     }
   }
 }
