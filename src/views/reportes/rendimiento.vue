@@ -4,8 +4,8 @@
     <div class="page-header">
       <div class="header-content">
         <div>
-          <h1><i class="el-icon-data-line" /> Análisis de Progreso</h1>
-          <p class="subtitle">Evolución y Rendimiento del Atleta</p>
+          <h1><i class="el-icon-data-line" /> Evolución de Atletas</h1>
+          <p class="subtitle">Análisis de Progreso y Rendimiento</p>
         </div>
       </div>
     </div>
@@ -158,7 +158,7 @@ import request from '@/utils/request'
 import * as echarts from 'echarts'
 
 export default {
-  name: 'RendimientoGeneral',
+  name: 'EvolucionAtletas',
   data() {
     return {
       selectedAtletaId: null,
