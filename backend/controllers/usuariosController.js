@@ -48,7 +48,7 @@ const login = async (req, res) => {
         rol: user.rol
       },
       JWT_SECRET,
-      { expiresIn: '8h' }
+      { expiresIn: '24h' }
     );
 
     // Guardar token en la base de datos

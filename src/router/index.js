@@ -238,8 +238,8 @@ export const constantRoutes = [
       {
         path: 'rendimiento',
         component: () => import('@/views/reportes/rendimiento'),
-        name: 'RendimientoGeneral',
-        meta: { title: 'Rendimiento General', icon: 'el-icon-trend-charts' }
+        name: 'EvolucionAtletas',
+        meta: { title: 'Evolución de Atletas', icon: 'el-icon-data-analysis' }
       },
       {
         path: 'medicos',
