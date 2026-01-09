@@ -8,6 +8,7 @@
           <div class="logo-text">
             <span class="club-name">Club Atlético</span>
             <span class="club-subname">Deportivo Acarigua</span>
+            <span class="club-motto">"La Armadura de Dios"</span>
           </div>
         </div>
       </div>
@@ -17,7 +18,7 @@
         <nav class="nav-links">
           <a href="#inicio" class="nav-link">Inicio</a>
           <a href="#nosotros" class="nav-link">Nosotros</a>
-          <a href="#contacto" class="nav-link">Contacto</a>
+          <a href="#footer" class="nav-link">Contacto</a>
         </nav>
       </div>
 
@@ -27,7 +28,7 @@
 
         <!-- Menú móvil -->
         <div class="mobile-menu" @click="toggleMobileMenu">
-          <i class="el-icon-menu"></i>
+          <i class="el-icon-menu" />
         </div>
       </div>
     </div>
@@ -36,7 +37,7 @@
     <div v-show="mobileMenuOpen" class="mobile-nav">
       <a href="#inicio" class="mobile-nav-link" @click="closeMobileMenu">Inicio</a>
       <a href="#nosotros" class="mobile-nav-link" @click="closeMobileMenu">Nosotros</a>
-      <a href="#contacto" class="mobile-nav-link" @click="closeMobileMenu">Contacto</a>
+      <a href="#footer" class="mobile-nav-link" @click="closeMobileMenu">Contacto</a>
       <div class="mobile-actions">
         <el-button class="mobile-login-btn" @click="goToLogin">Acceder</el-button>
       </div>
@@ -52,6 +53,12 @@ export default {
       mobileMenuOpen: false
     }
   },
+  mounted() {
+    window.addEventListener('resize', this.closeMobileMenu)
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.closeMobileMenu)
+  },
   methods: {
     goToLogin() {
       this.$router.push('/login')
@@ -62,12 +69,6 @@ export default {
     closeMobileMenu() {
       this.mobileMenuOpen = false
     }
-  },
-  mounted() {
-    window.addEventListener('resize', this.closeMobileMenu)
-  },
-  beforeDestroy() {
-    window.removeEventListener('resize', this.closeMobileMenu)
   }
 }
 </script>
@@ -127,6 +128,13 @@ export default {
   font-weight: 500;
   color: var(--color-text-dark);
   opacity: 0.8;
+}
+
+.club-motto {
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  font-style: italic;
+  font-weight: 500;
 }
 
 /* Menú de navegación */
