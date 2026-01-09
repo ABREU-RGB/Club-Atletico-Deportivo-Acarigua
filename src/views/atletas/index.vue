@@ -164,7 +164,12 @@
                 </div>
                 <div class="form-item full-width">
                   <label>Dirección</label>
-                  <p>{{ currentAtleta.direccion || 'No especificada' }}</p>
+                  <p>
+                    {{ currentAtleta.localidad || '' }}
+                    {{ currentAtleta.municipio ? ', ' + currentAtleta.municipio : '' }}
+                    {{ currentAtleta.estado ? ', ' + formatEnum(currentAtleta.estado) : '' }}
+                    {{ currentAtleta.pais ? ', ' + formatEnum(currentAtleta.pais) : '' }}
+                  </p>
                 </div>
               </div>
             </el-tab-pane>
@@ -432,9 +437,35 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="Dirección">
-          <el-input v-model="atletaForm.direccion" type="textarea" :rows="2" placeholder="Dirección (opcional)" />
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="País">
+              <el-select v-model="atletaForm.direccion.pais" placeholder="Seleccionar" style="width: 100%" filterable @change="handlePaisChangeAtleta">
+                <el-option v-for="pais in paises" :key="pais" :label="formatEnum(pais)" :value="pais" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="Estado">
+              <el-select v-if="atletaForm.direccion.pais === 'venezuela'" v-model="atletaForm.direccion.estado" placeholder="Seleccionar" style="width: 100%" filterable>
+                <el-option v-for="estado in estadosVenezuela" :key="estado" :label="formatEnum(estado)" :value="estado" />
+              </el-select>
+              <el-input v-else v-model="atletaForm.direccion.estado" placeholder="Estado / Provincia" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="Municipio">
+              <el-input v-model="atletaForm.direccion.municipio" placeholder="Municipio" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="Localidad">
+              <el-input v-model="atletaForm.direccion.localidad" placeholder="Localidad / Sector" />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <span slot="footer">
         <el-button @click="showAtletaModal = false">Cancelar</el-button>
@@ -694,6 +725,10 @@ export default {
       filterEstatus: '', // "" significa por defecto (Activos/Lesionados)
       searchTimeout: null,
 
+      // Listas para dirección
+      paises: ['venezuela', 'colombia', 'peru', 'argentina', 'bolivia', 'chile', 'uruguay', 'paraguay', 'brazil', 'panama', 'ecuador', 'guatemala', 'el salvador', 'mexico', 'cuba', 'honduras', 'nicaragua', 'costa rica', 'belice'],
+      estadosVenezuela: ['amazonas', 'anzoategui', 'apure', 'aragua', 'barinas', 'bolivia', 'carabobo', 'cojedes', 'delta amacuro', 'distrito capital', 'falcon', 'guarico', 'lara', 'merida', 'miranda', 'monagas', 'nueva esparta', 'portuguesa', 'sucre', 'tachira', 'trujillo', 'vargas', 'yaracuy', 'zulia'],
+
       // Formularios
       atletaForm: {
         nombre: '',
@@ -703,7 +738,12 @@ export default {
         categoria_id: '',
         tutor_id: null,
         telefono: '',
-        direccion: '',
+        direccion: {
+          pais: 'venezuela',
+          estado: '',
+          municipio: '',
+          localidad: ''
+        },
         estatus: 'ACTIVO',
         foto: null,
         pierna_dominante: 'Derecha'
@@ -910,7 +950,12 @@ export default {
           categoria_id: this.currentAtleta.categoria_id,
           tutor_id: this.currentAtleta.tutor_id || null,
           telefono: this.currentAtleta.telefono || '',
-          direccion: this.currentAtleta.direccion || '',
+          direccion: {
+            pais: this.currentAtleta.pais || 'venezuela',
+            estado: this.currentAtleta.estado || '',
+            municipio: this.currentAtleta.municipio || '',
+            localidad: this.currentAtleta.localidad || ''
+          },
           estatus: this.currentAtleta.estatus || 'ACTIVO',
           foto: this.currentAtleta.foto || '',
           pierna_dominante: this.currentAtleta.pierna_dominante || 'Derecha'
@@ -1202,7 +1247,12 @@ export default {
         categoria_id: '',
         tutor_id: null,
         telefono: '',
-        direccion: '',
+        direccion: {
+          pais: 'venezuela',
+          estado: '',
+          municipio: '',
+          localidad: ''
+        },
         estatus: 'ACTIVO',
         foto: null,
         pierna_dominante: 'Derecha'
@@ -1296,6 +1346,11 @@ export default {
       this.$message.success('Foto cargada exitosamente')
     },
 
+    handlePaisChangeAtleta() {
+      // Limpiar el campo estado al cambiar de país
+      this.atletaForm.direccion.estado = ''
+    },
+
     beforeAvatarUpload(file) {
       const isJPGorPNG = file.type === 'image/jpeg' || file.type === 'image/png'
       const isLt2M = file.size / 1024 / 1024 < 2
@@ -1306,10 +1361,20 @@ export default {
       if (!isLt2M) {
         this.$message.error('La imagen no puede exceder los 2MB')
       }
+      if (!isLt2M) {
+        this.$message.error('La imagen no puede exceder los 2MB')
+      }
       return isJPGorPNG && isLt2M
+    },
+
+    // Helper para capitalizar textos de enum
+    formatEnum(text) {
+      if (!text) return ''
+      return text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
     }
   }
 }
+
 </script>
 
 <style scoped>

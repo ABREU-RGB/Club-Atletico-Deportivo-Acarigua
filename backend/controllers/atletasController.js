@@ -7,10 +7,12 @@ const getAtletas = async (req, res) => {
     let query = `SELECT a.*, 
                 TIMESTAMPDIFF(YEAR, a.fecha_nacimiento, CURDATE()) as edad,
                 c.nombre_categoria as categoria_nombre,
-                t.nombre_completo as tutor_nombre
+                t.nombre_completo as tutor_nombre,
+                d.pais, d.estado, d.municipio, d.localidad
          FROM atletas a 
          LEFT JOIN categoria c ON a.categoria_id = c.categoria_id
          LEFT JOIN tutor t ON a.tutor_id = t.tutor_id
+         LEFT JOIN direcciones d ON a.direccion_id = d.direccion_id
          WHERE 1=1`;
 
     const params = [];
@@ -51,10 +53,12 @@ const getAtletaById = async (req, res) => {
               TIMESTAMPDIFF(YEAR, a.fecha_nacimiento, CURDATE()) as edad,
               c.nombre_categoria as categoria_nombre,
               t.nombre_completo as tutor_nombre,
-              t.telefono as tutor_telefono
+              t.telefono as tutor_telefono,
+              d.pais, d.estado, d.municipio, d.localidad
        FROM atletas a 
        LEFT JOIN categoria c ON a.categoria_id = c.categoria_id
        LEFT JOIN tutor t ON a.tutor_id = t.tutor_id
+       LEFT JOIN direcciones d ON a.direccion_id = d.direccion_id
        WHERE a.atleta_id = ?`,
       [id]
     );
@@ -76,7 +80,7 @@ const createAtleta = async (req, res) => {
       nombre,
       apellido,
       telefono,
-      direccion,
+      direccion, // Ahora es un objeto { pais, estado, municipio, localidad }
       fecha_nacimiento,
       posicion_de_juego,
       pierna_dominante,
@@ -86,11 +90,21 @@ const createAtleta = async (req, res) => {
       foto
     } = req.body;
 
+    let direccion_id = null;
+
+    if (direccion && (direccion.pais || direccion.estado || direccion.municipio || direccion.localidad)) {
+      const [dirResult] = await pool.execute(
+        `INSERT INTO direcciones (pais, estado, municipio, localidad) VALUES (?, ?, ?, ?)`,
+        [direccion.pais || '', direccion.estado || '', direccion.municipio || '', direccion.localidad || '']
+      );
+      direccion_id = dirResult.insertId;
+    }
+
     const [result] = await pool.execute(
       `INSERT INTO atletas 
-       (nombre, apellido, telefono, direccion, fecha_nacimiento, posicion_de_juego, pierna_dominante, categoria_id, tutor_id, estatus, foto) 
+       (nombre, apellido, telefono, direccion_id, fecha_nacimiento, posicion_de_juego, pierna_dominante, categoria_id, tutor_id, estatus, foto) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [nombre, apellido, telefono, direccion, fecha_nacimiento, posicion_de_juego, pierna_dominante || 'Derecha', categoria_id, tutor_id, estatus || 'ACTIVO', foto]
+      [nombre, apellido, telefono, direccion_id, fecha_nacimiento, posicion_de_juego, pierna_dominante || 'Derecha', categoria_id, tutor_id, estatus || 'ACTIVO', foto]
     );
 
     res.status(201).json({
@@ -111,7 +125,7 @@ const updateAtleta = async (req, res) => {
       nombre,
       apellido,
       telefono,
-      direccion,
+      direccion, // Objeto { pais, estado, municipio, localidad }
       fecha_nacimiento,
       posicion_de_juego,
       pierna_dominante,
@@ -121,17 +135,42 @@ const updateAtleta = async (req, res) => {
       foto
     } = req.body;
 
-    const [result] = await pool.execute(
-      `UPDATE atletas 
-       SET nombre = ?, apellido = ?, telefono = ?, direccion = ?, fecha_nacimiento = ?, 
-           posicion_de_juego = ?, pierna_dominante = ?, categoria_id = ?, tutor_id = ?, estatus = ?, foto = ?
-       WHERE atleta_id = ?`,
-      [nombre, apellido, telefono, direccion, fecha_nacimiento, posicion_de_juego, pierna_dominante, categoria_id, tutor_id, estatus, foto, id]
-    );
-
-    if (result.affectedRows === 0) {
+    // 1. Obtener el direccion_id actual del atleta
+    const [atletaRows] = await pool.execute('SELECT direccion_id FROM atletas WHERE atleta_id = ?', [id]);
+    if (atletaRows.length === 0) {
       return res.status(404).json({ error: 'Atleta no encontrado' });
     }
+
+    let currentDireccionId = atletaRows[0].direccion_id;
+
+    // 2. Manejar la dirección (Crear si no existe, actualizar si existe)
+    if (direccion) {
+      if (currentDireccionId) {
+        // Actualizar existente
+        await pool.execute(
+          `UPDATE direcciones SET pais = ?, estado = ?, municipio = ?, localidad = ? WHERE direccion_id = ?`,
+          [direccion.pais || '', direccion.estado || '', direccion.municipio || '', direccion.localidad || '', currentDireccionId]
+        );
+      } else {
+        // Crear nueva si no tenía
+        if (direccion.pais || direccion.estado || direccion.municipio || direccion.localidad) {
+          const [dirResult] = await pool.execute(
+            `INSERT INTO direcciones (pais, estado, municipio, localidad) VALUES (?, ?, ?, ?)`,
+            [direccion.pais || '', direccion.estado || '', direccion.municipio || '', direccion.localidad || '']
+          );
+          currentDireccionId = dirResult.insertId;
+        }
+      }
+    }
+
+    // 3. Actualizar atleta con el (posiblemente nuevo) direccion_id
+    await pool.execute(
+      `UPDATE atletas 
+       SET nombre = ?, apellido = ?, telefono = ?, direccion_id = ?, fecha_nacimiento = ?, 
+           posicion_de_juego = ?, pierna_dominante = ?, categoria_id = ?, tutor_id = ?, estatus = ?, foto = ?
+       WHERE atleta_id = ?`,
+      [nombre, apellido, telefono, currentDireccionId, fecha_nacimiento, posicion_de_juego, pierna_dominante, categoria_id, tutor_id, estatus, foto, id]
+    );
 
     res.json({ message: 'Atleta actualizado exitosamente' });
   } catch (error) {
