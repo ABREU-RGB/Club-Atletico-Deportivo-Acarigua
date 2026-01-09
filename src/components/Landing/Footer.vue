@@ -1,87 +1,91 @@
 <template>
-  <footer class="footer">
+  <footer id="footer" class="footer">
     <div class="footer-content">
-      <!-- Sección Principal -->
-      <div class="footer-main">
-        <div class="footer-brand">
+      <div class="footer-grid">
+        <!-- Columna 1: Marca -->
+        <div class="footer-column brand-column">
           <div class="footer-logo">
             <img src="../../assets/icons/logo.png" class="logo-icon">
             <div class="logo-text">
               <span class="club-name">Club Atlético</span>
               <span class="club-subname">Deportivo Acarigua</span>
+              <span class="club-motto">"La Armadura de Dios"</span>
             </div>
           </div>
-          <p class="footer-description">
-            "La Armadura de Dios"<br>
+          <p class="brand-info">
             Asociación Civil - RIF: J-503114630<br>
             Afiliada a la Asociación de Fútbol de Portuguesa
           </p>
-          <div class="social-links">
-            <a href="mailto:clubatleticodeportivoacarigua@gmail.com" class="social-link" aria-label="Email">
-              <img src="../../assets/icons/email-icon.png" alt="Email" class="custom-icon">
-            </a>
-            <a href="https://www.facebook.com/profile.php?id=100086449924024" class="social-link" aria-label="Facebook" target="_blank" rel="noopener">
-              <img src="../../assets/icons/facebook-icon.png" alt="Facebook" class="custom-icon">
-            </a>
-            <a href="https://instagram.com/Deportivoacarigua_oficial" class="social-link" aria-label="Instagram" target="_blank" rel="noopener">
-              <img src="../../assets/icons/instagram-icon.png" alt="Instagram" class="custom-icon">
-            </a>
+        </div>
+
+        <!-- Columna 2: Contacto -->
+        <div class="footer-column">
+          <h3 class="column-title">Contacto</h3>
+          <ul class="contact-list">
+            <li>
+              <div class="contact-item">
+                <a href="https://wa.me/5841215562442" target="_blank" rel="noopener" class="icon-link">
+                  <img src="../../assets/icons/whatsapp-icon.png" alt="Whatsapp" class="contact-icon">
+                </a>
+                <span class="static-text">+58 412-15562442</span>
+              </div>
+            </li>
+            <li>
+              <div class="contact-item">
+                <a href="mailto:clubatleticodeportivoacarigua@gmail.com" class="icon-link">
+                  <img src="../../assets/icons/email-icon.png" alt="Email" class="contact-icon">
+                </a>
+                <span class="static-text">Clubatleticodeportivoacarigua@gmail.com</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Columna 3: Ubicación -->
+        <div class="footer-column">
+          <h3 class="column-title">Ubicación</h3>
+          <div class="contact-item">
             <a
               href="https://www.google.com/maps/place/Universidad+Polit%C3%A9cnica+Territorial+de+Puerto+Cabello/@10.4578943,-68.0537897,17z/data=!4m6!3m5!1s0x8e8054018566d7a3:0x70a7d25b77dc46ff!8m2!3d10.4577097!4d-68.0527812!16s%2Fg%2F1hc63v0bq?entry=ttu&g_ep=EgoyMDI1MTExMi4wIKXMDSoASAFQAw%3D%3D"
-              class="social-link"
-              aria-label="Google Maps"
               target="_blank"
               rel="noopener"
+              class="icon-link"
             >
-              <img src="../../assets/icons/maps-icon.png" alt="Google Maps" class="custom-icon">
+              <img src="../../assets/icons/maps-icon.png" alt="Ubicación" class="contact-icon">
             </a>
+            <span class="static-text">U.P.T.P Juan de Jesús Montilla<br>Acarigua, Portuguesa</span>
           </div>
         </div>
 
-        <!-- Sección de enlaces rápidos eliminada: Enlaces (Inicio, Nosotros, Contacto) -->
-        <div class="footer-links">
-          <div class="link-group">
-            <h3 class="link-group-title">Contacto</h3>
-            <ul class="link-list">
-              <li class="contact-item">
-                <img src="../../assets/icons/maps-icon.png" alt="Ubicación" class="contact-icon">
-                <span>U.P.T.P Juan de Jesús Montilla<br>Acarigua, Portuguesa</span>
-              </li>
-              <li class="contact-item">
-                <img src="../../assets/icons/whatsapp-icon.png" alt="Whatsapp" class="contact-icon">
-                <span>+58 412-15562442</span>
-              </li>
-              <li class="contact-item">
-                <img src="../../assets/icons/email-icon.png" alt="Email" class="contact-icon">
-                <span>Clubatleticodeportivoacarigua@gmail.com</span>
-              </li>
-              <li class="contact-item">
-                <img src="../../assets/icons/facebook-icon.png" alt="Facebook" class="contact-icon">
-                <span>Club Atlético Deportivo Acarigua</span>
-              </li>
-              <li class="contact-item">
-                <img src="../../assets/icons/instagram-icon.png" alt="Instagram" class="contact-icon">
-                <span>@Deportivoacarigua_oficial</span>
-              </li>
-            </ul>
-          </div>
+        <!-- Columna 4: Redes -->
+        <div class="footer-column">
+          <h3 class="column-title">Redes</h3>
+          <ul class="contact-list">
+            <li>
+              <div class="contact-item">
+                <a href="https://www.facebook.com/profile.php?id=100086449924024" target="_blank" rel="noopener" class="icon-link">
+                  <img src="../../assets/icons/facebook-icon.png" alt="Facebook" class="contact-icon">
+                </a>
+                <span class="static-text">CLUB atlético Deportivo acarigua</span>
+              </div>
+            </li>
+            <li>
+              <div class="contact-item">
+                <a href="https://instagram.com/Deportivoacarigua_oficial" target="_blank" rel="noopener" class="icon-link">
+                  <img src="../../assets/icons/instagram-icon.png" alt="Instagram" class="contact-icon">
+                </a>
+                <span class="static-text">deportivoacarigua_oficial</span>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
 
-      <!-- Línea Separadora -->
       <div class="footer-divider" />
 
-      <!-- Pie Inferior -->
       <div class="footer-bottom">
-        <div class="footer-copyright">
-          <p>&copy; 2024 Club Atlético Deportivo Acarigua. Todos los derechos reservados.</p>
-          <p class="legal-info">Inscrito en el Ministerio del Poder Popular del Deporte</p>
-        </div>
-
-        <div class="footer-legal">
-          <a href="#privacidad" class="legal-link">Política de Privacidad</a>
-          <a href="#terminos" class="legal-link">Términos de Servicio</a>
-        </div>
+        <p>&copy; 2024 Club Atlético Deportivo Acarigua. Todos los derechos reservados.</p>
+        <p class="ministerio-info">Inscrito en el Ministerio del Poder Popular del Deporte</p>
       </div>
     </div>
   </footer>
@@ -97,7 +101,7 @@ export default {
 .footer {
   background: var(--color-text-dark);
   color: var(--color-background);
-  padding: 3rem 0 2rem;
+  padding: 4rem 0 2rem;
 }
 
 .footer-content {
@@ -106,19 +110,15 @@ export default {
   padding: 0 2rem;
 }
 
-/* Sección Principal */
-.footer-main {
+/* Grid Layout */
+.footer-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  margin-bottom: 2rem;
+  grid-template-columns: 1.5fr 1fr 1fr 0.8fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
 }
 
-/* Brand Section */
-.footer-brand {
-  max-width: 300px;
-}
-
+/* Marca */
 .footer-logo {
   display: flex;
   align-items: center;
@@ -126,135 +126,111 @@ export default {
   margin-bottom: 1.5rem;
 }
 
-.footer-logo .logo-icon {
-  height: 50px;
+.logo-icon {
+  height: 55px;
   width: auto;
 }
 
-.footer-logo .logo-text {
+.logo-text {
   display: flex;
   flex-direction: column;
   line-height: 1.1;
 }
 
-.footer-logo .club-name {
-  font-size: 1.2rem;
+.club-name {
+  font-size: 1.3rem;
   font-weight: 700;
 }
 
-.footer-logo .club-subname {
-  font-size: 0.9rem;
+.club-subname {
+  font-size: 0.95rem;
   font-weight: 500;
   opacity: 0.9;
 }
 
-.footer-description {
+.brand-info {
   line-height: 1.6;
   opacity: 0.8;
-  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
 }
 
-.social-links {
-  display: flex;
-  gap: 1rem;
+.club-motto {
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  font-style: italic;
+  font-weight: 500;
 }
 
-.social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  color: white;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.social-link:hover {
-  background: var(--color-primary);
-  transform: translateY(-2px);
-}
-
-.custom-icon {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
-  transition: all 0.3s ease;
-}
-
-.social-link:hover .custom-icon {
-  filter: brightness(0) invert(1);
-}
-
-/* Links Section */
-.footer-links {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-}
-
-.link-group-title {
+/* Columnas Comunes */
+.column-title {
   font-size: 1.1rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.2rem; /* Ajustado para que el contenido empiece en "La Armadura de Dios" */
   color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 28px; /* Altura igual al logo para alineación perfecta */
 }
 
-.link-list {
+.contact-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.link-list li {
-  margin-bottom: 0.75rem;
-}
-
-.footer-link {
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.footer-link:hover {
-  color: var(--color-primary);
+.contact-list li {
+  margin-bottom: 1.25rem;
 }
 
 .contact-item {
   display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  color: rgba(255, 255, 255, 0.8);
+  align-items: center;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+}
+
+.icon-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .contact-icon {
-  width: 18px;
-  height: 18px;
+  width: 33px;
+  height: 33px;
   object-fit: contain;
-  margin-top: 0.2rem;
-  flex-shrink: 0;
   filter: brightness(0) invert(1);
-  opacity: 0.8;
+  opacity: 0.9;
   transition: all 0.3s ease;
 }
 
-.contact-item span {
-  margin-top: 0.2rem;
+.icon-link:hover {
+  background: var(--color-primary);
+  transform: scale(1.1);
 }
 
-.contact-item:hover .contact-icon {
+.icon-link:hover .contact-icon {
   opacity: 1;
-  filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(320deg);
+  filter: brightness(0) invert(1);
+}
+
+.static-text {
+  line-height: 1.4;
+  opacity: 0.85;
 }
 
 /* Footer Bottom */
 .footer-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.2);
-  margin: 2rem 0;
+  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: 2rem;
 }
 
 .footer-bottom {
@@ -263,48 +239,31 @@ export default {
   align-items: center;
   flex-wrap: wrap;
   gap: 1.5rem;
-}
-
-.footer-copyright {
+  font-size: 0.9rem;
   opacity: 0.7;
-  font-size: 0.9rem;
 }
 
-.legal-info {
+.ministerio-info {
   font-size: 0.8rem;
-  opacity: 0.6;
-  margin-top: 0.5rem;
-}
-
-.footer-legal {
-  display: flex;
-  gap: 2rem;
-}
-
-.legal-link {
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.3s ease;
-}
-
-.legal-link:hover {
-  color: var(--color-primary);
+  opacity: 0.8;
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .footer-grid {
+    grid-template-columns: 1.5fr 1fr;
+    gap: 2.5rem;
+  }
+}
+
 @media (max-width: 768px) {
-  .footer-content {
-    padding: 0 1rem;
+  .footer {
+    padding: 3rem 0 1.5rem;
   }
 
-  .footer-main {
+  .footer-grid {
     grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-
-  .footer-brand {
-    max-width: 100%;
+    gap: 2.5rem;
     text-align: center;
   }
 
@@ -312,98 +271,27 @@ export default {
     justify-content: center;
   }
 
-  .social-links {
+  .contact-link {
     justify-content: center;
-    gap: 0.75rem;
   }
 
-  .social-link {
-    width: 35px;
-    height: 35px;
-  }
-
-  .custom-icon {
-    width: 18px;
-    height: 18px;
-  }
-
-  .footer-links {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  .contact-item {
-    gap: 0.75rem;
-  }
-
-  .contact-icon {
-    width: 16px;
-    height: 16px;
+  .social-grid {
+    justify-content: center;
   }
 
   .footer-bottom {
     flex-direction: column;
     text-align: center;
   }
-
-  .footer-legal {
-    flex-direction: column;
-    gap: 1rem;
-  }
 }
 
 @media (max-width: 480px) {
-  .footer {
-    padding: 2rem 0 1.5rem;
+  .club-name {
+    font-size: 1.1rem;
   }
 
-  .footer-logo .logo-text {
-    display: none;
-  }
-
-  .social-links {
-    gap: 0.5rem;
-  }
-
-  .social-link {
-    width: 32px;
-    height: 32px;
-  }
-
-  .custom-icon {
-    width: 16px;
-    height: 16px;
-  }
-
-  .contact-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-    text-align: left;
-  }
-
-  .contact-icon {
-    margin-top: 0;
-  }
-}
-
-@media (max-width: 360px) {
-  .footer-content {
-    padding: 0 0.75rem;
-  }
-
-  .social-links {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .link-group-title {
+  .column-title {
     font-size: 1rem;
-  }
-
-  .footer-link,
-  .contact-item span {
-    font-size: 0.85rem;
   }
 }
 </style>

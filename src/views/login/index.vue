@@ -73,12 +73,7 @@
             </div>
           </el-form-item>
 
-          <div class="form-options">
-            <el-checkbox v-model="rememberMe" class="mobile-checkbox">
-              Recordarme
-            </el-checkbox>
-            <a href="#forgot" class="forgot-link">¿Olvidaste tu contraseña?</a>
-          </div>
+          <!-- Form options removed: Recordarme and Olvidaste contraseña -->
 
           <el-button
             :loading="loading"
@@ -112,22 +107,18 @@
               <span>Inscrita en el Ministerio del Deporte</span>
             </div>
           </div>
-        </div>
         -->
 
-        <!-- Footer sin línea superior -->
         <div class="login-footer">
           <p>¿Necesitas acceso?
-            <a href="#contact" class="register-link">Contacta a la directiva</a>
+            <a href="#footer" class="register-link">Contacta a la directiva</a>
           </p>
         </div>
+      </div> <!-- Fin login-card -->
+    </div> <!-- Fin login-center-wrapper -->
 
-        <!-- Copyright dentro del card -->
-        <div class="login-copyright-card">
-          <p>&copy; 2024 Club Atlético Deportivo Acarigua - Todos los derechos reservados</p>
-        </div>
-      </div>
-    </div>
+    <!-- Footer Seccional -->
+    <Footer />
 
     <!-- Botón de volver -->
     <div class="back-to-home">
@@ -143,8 +134,11 @@
 </template>
 
 <script>
+import Footer from '@/components/Landing/Footer.vue'
+
 export default {
   name: 'Login',
+  components: { Footer },
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!value || value.trim() === '') {
@@ -226,15 +220,14 @@ export default {
 <style lang="scss" scoped>
 .login-container {
   min-height: 100vh;
-  min-height: 100dvh;
   width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
   background: linear-gradient(135deg, var(--color-primary) 0%, #8B0000 100%);
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: 0;
 }
 
 .login-background {
@@ -243,19 +236,14 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
+  background-image: url('../../assets/carousel/1.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .soccer-field {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    linear-gradient(90deg, transparent 49%, rgba(255,255,255,0.2) 49%, rgba(255,255,255,0.2) 51%, transparent 51%),
-    linear-gradient(transparent 49%, rgba(255,255,255,0.2) 49%, rgba(255,255,255,0.2) 51%, transparent 51%),
-    radial-gradient(circle at 50% 50%, transparent 69%, rgba(255,255,255,0.2) 69%, rgba(255,255,255,0.2) 71%, transparent 71%);
-  opacity: 0.3;
+  display: none; /* Quitamos las líneas de la cancha para no recargar la imagen */
 }
 
 .gradient-overlay {
@@ -264,7 +252,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(229, 29, 34, 0.9) 0%, rgba(139, 0, 0, 0.8) 100%);
+  background: linear-gradient(135deg, rgba(229, 29, 34, 0.75) 0%, rgba(139, 0, 0, 0.65) 100%);
 }
 
 .login-center-wrapper {
@@ -564,16 +552,19 @@ export default {
 }
 */
 
-/* Footer sin línea superior */
+.footer {
+  width: 100%;
+  z-index: 2;
+}
+
 .login-footer {
   text-align: center;
-  padding-top: 0; /* Eliminado el padding superior */
-  margin-bottom: 1rem;
-  border-top: none; /* Eliminada la línea gris */
+  padding-top: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .login-footer p {
-  color: #000; /* Texto en negro para '¿Necesitas acceso?' */
+  color: #000;
   margin: 0;
   font-size: 0.85rem;
 }
@@ -582,29 +573,18 @@ export default {
   color: var(--color-primary);
   text-decoration: none;
   font-weight: 600;
-  transition: color 0.2s ease;
-  padding: 2px 4px;
+  transition: all 0.2s ease;
+  padding: 4px 8px;
   border-radius: 4px;
 }
 
 .register-link:hover {
-  color: #8B0000;
-  text-decoration: underline;
   background: rgba(229, 29, 34, 0.05);
+  text-decoration: underline;
 }
 
-/* Copyright dentro del card */
-.login-copyright-card {
-  text-align: center;
-  padding-top: 1rem;
-  border-top: 1px solid #e2e8f0; /* Solo esta línea queda */
-}
-
-.login-copyright-card p {
-  color: var(--color-text-light);
-  font-size: 0.75rem;
-  margin: 0;
-  line-height: 1.4;
+:deep(html) {
+  scroll-behavior: smooth;
 }
 
 .back-to-home {
