@@ -92,36 +92,12 @@ export const constantRoutes = [
   {
     path: '/asistencia',
     component: Layout,
-    redirect: '/asistencia/registro',
-    name: 'Asistencia',
-    meta: {
-      title: 'Asistencia',
-      icon: 'el-icon-document'
-    },
     children: [
       {
         path: 'registro',
         component: () => import('@/views/asistencia/registro'),
         name: 'RegistroDiario',
-        meta: { title: 'Registro Diario', icon: 'el-icon-edit' }
-      },
-      {
-        path: 'reportes-mes',
-        component: () => import('@/views/asistencia/reportes-mes'),
-        name: 'ReportesMes',
-        meta: { title: 'Reportes por Mes', icon: 'el-icon-data-analysis' }
-      },
-      {
-        path: 'estadisticas',
-        component: () => import('@/views/asistencia/estadisticas'),
-        name: 'EstadisticasAsistencia',
-        meta: { title: 'Estadísticas', icon: 'el-icon-pie-chart' }
-      },
-      {
-        path: 'historial',
-        component: () => import('@/views/asistencia/historial'),
-        name: 'HistorialCompleto',
-        meta: { title: 'Historial Completo', icon: 'el-icon-document-copy' }
+        meta: { title: 'Asistencia', icon: 'el-icon-document' }
       }
     ]
   },
@@ -192,38 +168,6 @@ export const constantRoutes = [
     ]
   },
 
-  // ========== MÉDICO/ENFERMERÍA ==========
-  {
-    path: '/medico',
-    component: Layout,
-    redirect: '/medico/consultas',
-    name: 'Medico',
-    meta: {
-      title: 'Médico/Enfermería',
-      icon: 'el-icon-first-aid-kit'
-    },
-    children: [
-      {
-        path: 'consultas',
-        component: () => import('@/views/medico/consultas'),
-        name: 'ConsultasMedicas',
-        meta: { title: 'Consultas', icon: 'el-icon-document-checked' }
-      },
-      {
-        path: 'historial',
-        component: () => import('@/views/medico/historial'),
-        name: 'HistorialMedico',
-        meta: { title: 'Historial Médico', icon: 'el-icon-folder-opened' }
-      },
-      {
-        path: 'lesiones',
-        component: () => import('@/views/medico/lesiones'),
-        name: 'ReportesLesiones',
-        meta: { title: 'Reportes Lesiones', icon: 'el-icon-warning' }
-      }
-    ]
-  },
-
   // ========== REPORTES ==========
   {
     path: '/reportes',
@@ -240,12 +184,6 @@ export const constantRoutes = [
         component: () => import('@/views/reportes/rendimiento'),
         name: 'EvolucionAtletas',
         meta: { title: 'Evolución de Atletas', icon: 'el-icon-data-analysis' }
-      },
-      {
-        path: 'medicos',
-        component: () => import('@/views/reportes/medicos'),
-        name: 'ReportesMedicos',
-        meta: { title: 'Reportes Médicos', icon: 'el-icon-first-aid-kit' }
       },
       {
         path: 'asistencia-mensual',
