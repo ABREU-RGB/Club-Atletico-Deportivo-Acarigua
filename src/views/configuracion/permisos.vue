@@ -31,7 +31,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="descripcion" label="Descripción" min-width="300">
+        <el-table-column prop="descripcion" label="Descripción" min-width="300" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.descripcion || 'Sin descripción' }}</span>
           </template>
@@ -48,7 +48,7 @@
             {{ formatDate(row.fecha_creacion) }}
           </template>
         </el-table-column>
-        <el-table-column label="Acciones" width="180" align="center" fixed="right">
+        <el-table-column label="Acciones" width="160" align="center">
           <template slot-scope="{ row }">
             <el-button
               type="primary"
@@ -321,5 +321,29 @@ export default {
 ::v-deep .el-table .el-button--primary.is-circle:hover {
   background-color: #c41a1d;
   border-color: #c41a1d;
+}
+::v-deep .el-table .el-table__fixed-right::before,
+::v-deep .el-table .el-table__fixed::before {
+  display: none !important;
+}
+
+::v-deep .el-table__fixed-right {
+  box-shadow: none !important;
+}
+
+::v-deep .el-table--border th.gutter:last-of-type {
+  border-bottom: 1px solid #dfe6ec !important;
+}
+::v-deep .el-table td,
+::v-deep .el-table th {
+  padding: 12px 0 !important;
+  height: 60px;
+}
+
+::v-deep .el-table .cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 24px;
 }
 </style>

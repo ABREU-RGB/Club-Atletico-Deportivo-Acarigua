@@ -290,24 +290,6 @@ export const constantRoutes = [
         component: () => import('@/views/configuracion/permisos'),
         name: 'PermisosRoles',
         meta: { title: 'Gestión de Roles', icon: 'el-icon-lock' }
-      },
-      {
-        path: 'club',
-        component: () => import('@/views/configuracion/club'),
-        name: 'ConfiguracionClub',
-        meta: { title: 'Configuración Club', icon: 'el-icon-office-building' }
-      },
-      {
-        path: 'notificaciones',
-        component: () => import('@/views/configuracion/notificaciones'),
-        name: 'ConfigNotificaciones',
-        meta: { title: 'Notificaciones', icon: 'el-icon-message' }
-      },
-      {
-        path: 'respaldo',
-        component: () => import('@/views/configuracion/respaldo'),
-        name: 'RespaldoDatos',
-        meta: { title: 'Respaldo de Datos', icon: 'el-icon-refresh' }
       }
     ]
   },

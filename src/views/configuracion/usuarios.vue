@@ -152,8 +152,13 @@
         <el-form-item label="Email" prop="email">
           <el-input v-model="usuarioForm.email" placeholder="correo@ejemplo.com" />
         </el-form-item>
-        <el-form-item v-if="!isEditing" label="Contraseña" prop="password">
-          <el-input v-model="usuarioForm.password" type="password" placeholder="Contraseña requerida" show-password />
+        <el-form-item label="Contraseña" prop="password">
+          <el-input
+            v-model="usuarioForm.password"
+            type="password"
+            :placeholder="isEditing ? 'Dejar en blanco para no cambiar' : 'Mínimo 6 caracteres'"
+            show-password
+          />
         </el-form-item>
         <el-form-item label="Rol" prop="rol">
           <el-select v-model="usuarioForm.rol" placeholder="Seleccionar rol" style="width: 100%">
@@ -189,6 +194,15 @@ import { getRoles } from '@/api/roles'
 export default {
   name: 'UsuariosSistema',
   data() {
+    const validatePassword = (rule, value, callback) => {
+      if (!this.isEditing && !value) {
+        callback(new Error('La contraseña es requerida'))
+      } else if (value && value.length < 6) {
+        callback(new Error('Mínimo 6 caracteres'))
+      } else {
+        callback()
+      }
+    }
     return {
       usuarios: [],
       roles: [],
@@ -210,7 +224,7 @@ export default {
           { required: true, message: 'El email es requerido', trigger: 'blur' },
           { type: 'email', message: 'Ingrese un email válido', trigger: 'blur' }
         ],
-        password: [{ required: true, message: 'La contraseña es requerida', trigger: 'blur' }],
+        password: [{ required: true, trigger: 'blur', validator: validatePassword }],
         rol: [{ required: true, message: 'El rol es requerido', trigger: 'change' }]
       }
     }
@@ -271,7 +285,7 @@ export default {
         this.$message.error('Error al cargar datos del usuario')
       }
     },
-    openUsuarioModal(isEdit) {
+    async openUsuarioModal(isEdit) {
       this.isEditing = isEdit
       if (isEdit && this.currentUsuario) {
         this.usuarioForm = {
@@ -283,7 +297,10 @@ export default {
       } else {
         this.resetForm()
       }
+
       this.showUsuarioModal = true
+      // Refrescar roles para asegurar que aparezcan los recién creados
+      await this.loadRoles()
     },
     handleEdit() {
       this.openUsuarioModal(true)
