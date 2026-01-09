@@ -27,7 +27,7 @@
 
         <!-- Menú móvil -->
         <div class="mobile-menu" @click="toggleMobileMenu">
-          <i class="el-icon-menu"></i>
+          <i class="el-icon-menu" />
         </div>
       </div>
     </div>
@@ -52,6 +52,12 @@ export default {
       mobileMenuOpen: false
     }
   },
+  mounted() {
+    window.addEventListener('resize', this.closeMobileMenu)
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.closeMobileMenu)
+  },
   methods: {
     goToLogin() {
       this.$router.push('/login')
@@ -62,12 +68,6 @@ export default {
     closeMobileMenu() {
       this.mobileMenuOpen = false
     }
-  },
-  mounted() {
-    window.addEventListener('resize', this.closeMobileMenu)
-  },
-  beforeDestroy() {
-    window.removeEventListener('resize', this.closeMobileMenu)
   }
 }
 </script>

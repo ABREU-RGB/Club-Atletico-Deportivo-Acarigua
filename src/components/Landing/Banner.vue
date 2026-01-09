@@ -1,20 +1,20 @@
 <template>
-  <section class="banner" id="inicio">
+  <section id="inicio" class="banner">
     <!-- Carrusel de Fotos - Sin controles -->
     <div class="banner-carousel">
-      <el-carousel 
-        :interval="5000" 
-        height="100vh" 
+      <el-carousel
+        :interval="5000"
+        height="100vh"
         :indicator-position="null"
         :arrow="never"
         class="hero-carousel simple-carousel"
       >
         <el-carousel-item v-for="(image, index) in carouselImages" :key="index">
-          <div 
-            class="carousel-slide" 
+          <div
+            class="carousel-slide"
             :style="{ backgroundImage: `url(${image.url})` }"
           >
-            <div class="carousel-overlay"></div>
+            <div class="carousel-overlay" />
           </div>
         </el-carousel-item>
       </el-carousel>
@@ -33,7 +33,7 @@
         </h1>
 
         <p class="banner-description">
-          Formando atletas con valores cristianos, disciplina y excelencia deportiva. 
+          Formando atletas con valores cristianos, disciplina y excelencia deportiva.
           Más de 250 personas beneficiadas en el municipio Páez.
         </p>
 
@@ -44,7 +44,7 @@
             class="primary-action"
             @click="goToLogin"
           >
-            <i class="el-icon-user"></i>
+            <i class="el-icon-user" />
             Acceder al Sistema
           </el-button>
 
@@ -53,7 +53,7 @@
             class="secondary-action"
             @click="scrollToSection('nosotros')"
           >
-            <i class="el-icon-info"></i>
+            <i class="el-icon-info" />
             Conocer Más
           </el-button>
         </div>
@@ -147,8 +147,8 @@ export default {
   right: 0;
   bottom: 0;
   background: linear-gradient(
-    135deg, 
-    rgba(229, 29, 34, 0.7) 0%, 
+    135deg,
+    rgba(229, 29, 34, 0.7) 0%,
     rgba(139, 0, 0, 0.6) 100%
   );
 }
