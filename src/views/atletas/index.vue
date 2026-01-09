@@ -1348,13 +1348,23 @@ export default {
 
 .main-content {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 25px;
+  grid-template-columns: 300px 1fr;
+  gap: 15px;
+}
+
+aside.sidebar {
+  padding: 0;
+  background: transparent;
+  margin-bottom: 0;
 }
 
 .sidebar .el-card {
   height: calc(100vh - 200px);
   overflow: hidden;
+}
+
+.sidebar ::v-deep .el-card__body {
+  padding: 0;
 }
 
 .athlete-list {
@@ -1483,25 +1493,44 @@ export default {
 }
 
 .athlete-photo {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  flex-shrink: 0;
   border-radius: 50%;
   background-color: #E51D22;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 20px;
+  overflow: hidden;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.athlete-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .athlete-info h3 {
-  font-size: 1rem;
-  margin: 0 0 5px 0;
+  font-size: 0.85rem;
+  margin: 0 0 4px 0;
   color: #2c3e50;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .athlete-info p {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #64748b;
   margin: 2px 0;
 }
@@ -1530,12 +1559,15 @@ export default {
 
 .athlete-details-info {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .athlete-details-info h2 {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   margin: 0 0 8px 0;
   color: #2c3e50;
+  word-break: break-all;
 }
 
 .athlete-details-info p {
