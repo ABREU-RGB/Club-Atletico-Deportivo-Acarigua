@@ -1,4 +1,36 @@
 const pool = require('../config/database');
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+
+// Configuración de Multer para avatares
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const dir = 'uploads/avatars';
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, 'avatar-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Solo se permiten imágenes (jpeg, jpg, png)'));
+  }
+}).single('avatar');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../middleware/auth');
 
@@ -282,6 +314,103 @@ const updateUsuario = async (req, res) => {
   }
 };
 
+// Actualizar perfil del usuario logueado
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.userId; // Obtenido del token
+    const { email, password, newPassword, confirmPassword, foto } = req.body;
+
+    // Obtener usuario actual para verificar contraseña
+    const [users] = await pool.execute(
+      'SELECT * FROM usuarios WHERE usuario_id = ? AND estatus = ?',
+      [userId, 'ACTIVO']
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    const user = users[0];
+
+    // Verificar contraseña actual obligatoria para cualquier cambio sensible
+    if (!password) {
+      return res.status(400).json({ error: 'Se requiere la contraseña actual para guardar cambios' });
+    }
+
+    if (password !== user.password) {
+      return res.status(400).json({ error: 'Contraseña actual incorrecta' });
+    }
+
+    const updates = [];
+    const params = [];
+
+    // Cambiar Email
+    if (email && email !== user.email) {
+      // Verificar duplicado
+      const [duplicate] = await pool.execute(
+        'SELECT usuario_id FROM usuarios WHERE email = ? AND usuario_id != ?',
+        [email, userId]
+      );
+      if (duplicate.length > 0) {
+        return res.status(400).json({ error: 'El email ya está en uso' });
+      }
+      updates.push('email = ?');
+      params.push(email);
+    }
+
+    // Cambiar Contraseña
+    if (newPassword) {
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ error: 'La nueva contraseña y la confirmación no coinciden' });
+      }
+      updates.push('password = ?');
+      params.push(newPassword);
+    }
+
+    // Actualizar foto (si se envió desde el frontend el filename)
+    if (foto) {
+      updates.push('foto = ?');
+      params.push(foto);
+    }
+
+    if (updates.length === 0) {
+      return res.json({ message: 'No se detectaron cambios' });
+    }
+
+    params.push(userId);
+    await pool.execute(
+      `UPDATE usuarios SET ${updates.join(', ')} WHERE usuario_id = ?`,
+      params
+    );
+
+    res.json({ message: 'Perfil actualizado exitosamente' });
+
+  } catch (error) {
+    console.error('Error actualizando perfil:', error);
+    res.status(500).json({ error: 'Error al actualizar perfil' });
+  }
+};
+
+// Subir Avatar
+const uploadAvatar = (req, res) => {
+  upload(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      // Error de Multer
+      return res.status(500).json({ error: err.message });
+    } else if (err) {
+      // Otro error desconocido
+      return res.status(500).json({ error: err.message });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No se ha subido ningún archivo' });
+    }
+
+    // Retorna el nombre del archivo para que el frontend lo use en updateProfile
+    res.json({ filename: req.file.filename });
+  });
+};
+
+
 // Eliminar usuario (soft delete - cambiar estatus a INACTIVO)
 const deleteUsuario = async (req, res) => {
   try {
@@ -319,5 +448,7 @@ module.exports = {
   logout,
   createUsuario,
   updateUsuario,
-  deleteUsuario
+  deleteUsuario,
+  updateProfile,
+  uploadAvatar
 };
