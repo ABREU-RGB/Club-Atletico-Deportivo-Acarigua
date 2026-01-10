@@ -14,3 +14,26 @@ export function getPlantelByRol(rol) {
     method: 'get'
   })
 }
+
+export function createPlantel(data) {
+  return request({
+    url: '/plantel',
+    method: 'post',
+    data
+  })
+}
+
+export function updatePlantel(id, data) {
+  return request({
+    url: `/plantel/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+export function deletePlantel(id) {
+  return request({
+    url: `/plantel/${id}`,
+    method: 'delete'
+  })
+}
