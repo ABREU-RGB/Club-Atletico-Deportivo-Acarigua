@@ -130,40 +130,16 @@ export const constantRoutes = [
     ]
   },
 
-  // ========== ENTRENADORES ==========
+  // ========== PLANTEL ==========
   {
-    path: '/entrenadores',
+    path: '/plantel',
     component: Layout,
-    redirect: '/entrenadores/lista',
-    name: 'Entrenadores',
-    meta: {
-      title: 'Entrenadores',
-      icon: 'el-icon-user-solid'
-    },
     children: [
       {
-        path: 'lista',
-        component: () => import('@/views/entrenadores/lista'),
-        name: 'ListaEntrenadores',
-        meta: { title: 'Lista Completa', icon: 'el-icon-s-custom' }
-      },
-      {
-        path: 'asignacion',
-        component: () => import('@/views/entrenadores/asignacion'),
-        name: 'AsignacionAtletas',
-        meta: { title: 'Asignación Atletas', icon: 'el-icon-connection' }
-      },
-      {
-        path: 'horarios',
-        component: () => import('@/views/entrenadores/horarios'),
-        name: 'HorariosEntrenadores',
-        meta: { title: 'Horarios', icon: 'el-icon-time' }
-      },
-      {
-        path: 'especialidades',
-        component: () => import('@/views/entrenadores/especialidades'),
-        name: 'EspecialidadesEntrenadores',
-        meta: { title: 'Especialidades', icon: 'el-icon-star-on' }
+        path: 'index',
+        component: () => import('@/views/plantel/index'),
+        name: 'Plantel',
+        meta: { title: 'Plantel', icon: 'el-icon-s-custom' }
       }
     ]
   },
