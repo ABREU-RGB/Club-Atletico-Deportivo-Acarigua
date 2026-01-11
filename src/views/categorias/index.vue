@@ -5,7 +5,12 @@
       <div class="header-content">
         <div class="logo">
           <span class="logo-icon">⚽</span>
-          <h1>Gestión de Categorías - Club de Fútbol</h1>
+          <h1>
+            Gestión de Categorías - Club de Fútbol
+            <el-tag v-if="!canUserEdit" type="info" size="small" style="margin-left: 10px;">
+              Solo Lectura
+            </el-tag>
+          </h1>
         </div>
       </div>
     </div>
@@ -53,7 +58,7 @@
               <span>Aplicar Filtros</span>
             </button>
 
-            <button class="btn btn-category" @click="nuevaCategoria">
+            <button v-if="canUserEdit" class="btn btn-category" @click="nuevaCategoria">
               <span>+</span> Nueva Categoría
             </button>
           </div>
@@ -125,8 +130,8 @@
                 </div>
               </div>
               <div class="category-actions">
-                <button class="action-btn action-edit" @click="editarCategoria(categoria)">Editar</button>
-                <button class="action-btn action-delete" @click="eliminarCategoria(categoria)">Eliminar</button>
+                <button v-if="canUserEdit" class="action-btn action-edit" @click="editarCategoria(categoria)">Editar</button>
+                <button v-if="canUserEdit" class="action-btn action-delete" @click="eliminarCategoria(categoria)">Eliminar</button>
               </div>
             </div>
           </div>
@@ -138,6 +143,8 @@
 
 <script>
 import request from '@/utils/request'
+import { canEdit } from '@/utils/permission'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'Categorias',
@@ -158,6 +165,14 @@ export default {
         edad_max: 7,
         entrenador_id: ''
       }
+    }
+  },
+  computed: {
+    ...mapGetters(['roles']),
+
+    // Verificar si el usuario puede editar
+    canUserEdit() {
+      return canEdit()
     }
   },
   created() {

@@ -4,10 +4,18 @@
     <div class="page-header">
       <div class="header-content">
         <div>
-          <h1><i class="el-icon-user" /> Gestión de Atletas</h1>
+          <h1>
+            <i class="el-icon-user" /> Gestión de Atletas
+            <el-tag v-if="!canUserEdit && !isUserMedico" type="info" size="small" style="margin-left: 10px;">
+              Solo Lectura
+            </el-tag>
+            <el-tag v-if="isUserMedico" type="warning" size="small" style="margin-left: 10px;">
+              Acceso Médico
+            </el-tag>
+          </h1>
           <p class="subtitle">Club Atlético Deportivo Acarigua</p>
         </div>
-        <el-button type="primary" icon="el-icon-plus" @click="openAtletaModal(false)">
+        <el-button v-if="canUserEdit" type="primary" icon="el-icon-plus" @click="openAtletaModal(false)">
           Agregar Atleta
         </el-button>
       </div>
@@ -111,16 +119,16 @@
               <el-tag :type="getStatusType(currentAtleta.estatus)">{{ currentAtleta.estatus }}</el-tag>
             </div>
             <div class="athlete-actions">
-              <el-button type="info" icon="el-icon-data-line" @click="goToProgress">Análisis</el-button>
-              <el-button type="danger" icon="el-icon-delete" @click="deleteAtleta">Eliminar</el-button>
-              <el-button type="primary" icon="el-icon-edit" @click="handleEdit">Editar</el-button>
+              <el-button v-if="!isUserMedico" type="info" icon="el-icon-data-line" @click="goToProgress">Análisis</el-button>
+              <el-button v-if="canUserEdit && !isUserMedico" type="danger" icon="el-icon-delete" @click="deleteAtleta">Eliminar</el-button>
+              <el-button v-if="canUserEdit || isUserMedico" type="primary" icon="el-icon-edit" @click="handleEdit">Editar</el-button>
             </div>
           </div>
 
           <!-- Tabs -->
           <el-tabs v-model="activeTab" type="border-card">
             <!-- Tab 1: Datos Personales -->
-            <el-tab-pane label="Datos Personales" name="personal">
+            <el-tab-pane v-if="isTabVisible('datos-personales')" label="Datos Personales" name="personal">
               <div class="form-grid">
                 <div class="form-item">
                   <label>Nombre</label>
@@ -175,7 +183,7 @@
             </el-tab-pane>
 
             <!-- Tab 2: Ficha Médica -->
-            <el-tab-pane label="Ficha Médica" name="medical">
+            <el-tab-pane v-if="isTabVisible('ficha-medica')" label="Ficha Médica" name="medical">
               <div v-if="fichaMedica" class="form-grid">
                 <div class="form-item">
                   <label>Tipo Sanguíneo</label>
@@ -206,7 +214,7 @@
             </el-tab-pane>
 
             <!-- Tab 3: Medidas Antropométricas -->
-            <el-tab-pane label="Medidas Antropométricas" name="anthropometric">
+            <el-tab-pane v-if="isTabVisible('medidas-antropometricas')" label="Medidas Antropométricas" name="anthropometric">
               <div v-if="medidas && medidas.length > 0" class="form-grid">
                 <div class="form-item">
                   <label>Peso (kg)</label>
@@ -245,7 +253,7 @@
             </el-tab-pane>
 
             <!-- Tab 4: Rendimiento -->
-            <el-tab-pane label="Rendimiento" name="performance">
+            <el-tab-pane v-if="isTabVisible('rendimiento')" label="Rendimiento" name="performance">
               <div v-if="tests && tests.length > 0">
                 <div class="performance-grid">
                   <div class="performance-item">
@@ -282,7 +290,7 @@
             </el-tab-pane>
 
             <!-- Tab 5: Tutor -->
-            <el-tab-pane label="Tutor" name="tutor">
+            <el-tab-pane v-if="isTabVisible('tutor')" label="Tutor" name="tutor">
               <div v-if="tutor" class="form-grid">
                 <div class="form-item">
                   <label>Nombre Completo</label>
@@ -689,6 +697,8 @@
 
 <script>
 import request from '@/utils/request'
+import { canEdit, isMedico, getVisibleAtletasTabs } from '@/utils/permission'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'Atletas',
@@ -793,6 +803,31 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapGetters(['roles']),
+
+    // Verificar si el usuario puede editar
+    canUserEdit() {
+      return canEdit()
+    },
+
+    // Verificar si el usuario es médico
+    isUserMedico() {
+      return isMedico()
+    },
+
+    // Obtener pestañas visibles según el rol
+    visibleTabs() {
+      return getVisibleAtletasTabs()
+    },
+
+    // Verificar si una pestaña específica es visible
+    isTabVisible() {
+      return (tabName) => {
+        return this.visibleTabs.includes(tabName)
+      }
+    }
+  },
   watch: {
     searchQuery() {
       if (this.searchTimeout) clearTimeout(this.searchTimeout)
@@ -805,6 +840,14 @@ export default {
     },
     filterEstatus() {
       this.loadAtletas()
+    },
+    currentAtletaId: {
+      immediate: false,
+      handler(newId) {
+        if (newId && this.isUserMedico) {
+          this.activeTab = 'medical'
+        }
+      }
     }
   },
   created() {
@@ -864,7 +907,8 @@ export default {
       this.currentAtleta = this.atletas.find(a => a.atleta_id === id) || {}
 
       if (!keepTab) {
-        this.activeTab = 'personal'
+        // Si es médico, ir a pestaña médica; si no, a personal
+        this.activeTab = this.isUserMedico ? 'medical' : 'personal'
         this.fichaMedica = null
         this.medidas = []
         this.tests = []
