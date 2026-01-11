@@ -146,7 +146,10 @@ const getInfo = async (req, res) => {
     const userId = req.userId;
 
     const [users] = await pool.execute(
-      'SELECT usuario_id, email, rol FROM usuarios WHERE usuario_id = ? AND estatus = ?',
+      `SELECT u.usuario_id, u.email, u.rol, r.nombre_rol
+       FROM usuarios u
+       LEFT JOIN rol_usuarios r ON u.rol = r.rol_id
+       WHERE u.usuario_id = ? AND u.estatus = ?`,
       [userId, 'ACTIVO']
     );
 
@@ -158,10 +161,12 @@ const getInfo = async (req, res) => {
 
     res.json({
       data: {
-        roles: [user.rol],
+        roles: [user.nombre_rol], // Retornar el nombre del rol exacto de la BD: 'super_user', 'administrador', 'entrenador', 'medico'
+        roleName: user.nombre_rol,
+        roleId: user.rol,
         name: user.email, // Usamos email como nombre ya que no hay nombre/apellido
         avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
-        introduction: `${user.rol} del Club Atlético Deportivo Acarigua`
+        introduction: `${user.nombre_rol} del Club Atlético Deportivo Acarigua`
       }
     });
 
