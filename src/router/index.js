@@ -197,6 +197,7 @@ export const asyncRoutes = [
         path: 'plantel-reporte',
         component: () => import('@/views/reportes/plantel-reporte'),
         name: 'ReportePlantel',
+        hidden: true,
         meta: { title: 'Plantel', icon: 'el-icon-s-custom', roles: ['super_user', 'administrador'] }
       },
       {
