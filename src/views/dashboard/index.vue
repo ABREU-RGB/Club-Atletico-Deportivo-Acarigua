@@ -31,7 +31,6 @@ export default {
 <style lang="scss" scoped>
 .inicio-container {
   padding: 40px;
-  background-color: #f5f7fa;
   min-height: calc(100vh - 84px);
   display: flex;
   align-items: center;

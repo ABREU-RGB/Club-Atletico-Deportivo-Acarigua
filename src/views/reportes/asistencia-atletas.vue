@@ -1,51 +1,629 @@
 <template>
-  <div class="app-container">
-    <el-card class="box-card">
-      <div slot="header" class="clearfix">
-        <span style="font-size: 18px; font-weight: bold;">
-          <i class="el-icon-date" /> Asistencia de Atletas
+  <div class="asistencia-reporte-container">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <div>
+          <h1><i class="el-icon-date" /> Reporte de Asistencia</h1>
+          <p class="subtitle">Análisis detallado por atleta y categoría</p>
+        </div>
+        <div class="no-print">
+          <el-button icon="el-icon-printer" plain @click="handlePrint">
+            Imprimir Reporte
+          </el-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <el-card shadow="hover" class="filters-card no-print">
+      <div class="filters-row">
+        <div class="filter-item">
+          <label>Categoría</label>
+          <el-select
+            v-model="filters.categoria_id"
+            placeholder="Seleccionar Categoría"
+            clearable
+            filterable
+            style="width: 100%"
+            @change="handleFilterChange"
+          >
+            <el-option
+              v-for="cat in categorias"
+              :key="cat.categoria_id"
+              :label="cat.nombre_categoria"
+              :value="cat.categoria_id"
+            />
+          </el-select>
+        </div>
+
+        <div class="filter-item date-range">
+          <label>Rango de Fechas</label>
+          <el-date-picker
+            v-model="filters.dateRange"
+            type="daterange"
+            range-separator="a"
+            start-placeholder="Inicio"
+            end-placeholder="Fin"
+            value-format="yyyy-MM-dd"
+            style="width: 100%"
+            @change="handleFilterChange"
+          />
+        </div>
+
+        <div class="filter-item search-box">
+          <label>Buscar Atleta</label>
+          <el-input
+            v-model="filters.search"
+            placeholder="Nombre o apellido..."
+            prefix-icon="el-icon-search"
+            clearable
+          />
+        </div>
+      </div>
+    </el-card>
+
+    <!-- Main Content -->
+    <el-card shadow="hover" class="main-card">
+      <div v-if="loading" class="loading-state">
+        <i class="el-icon-loading" /> Cargando datos...
+      </div>
+
+      <div v-else>
+        <!-- Summary Stats (Optional Global Header for Print) -->
+        <div class="print-only-header">
+          <h1>Reporte de Asistencia</h1>
+          <p v-if="selectedCategoryName">Categoría: {{ selectedCategoryName }}</p>
+          <p class="date">Generado el: {{ new Date().toLocaleDateString() }}</p>
+        </div>
+
+        <el-table
+          :data="filteredAthletesStats"
+          style="width: 100%"
+          border
+          stripe
+          :header-cell-style="{background: '#f8fafc', color: '#324157', fontWeight: 'bold'}"
+        >
+          <el-table-column label="Atleta" min-width="250">
+            <template slot-scope="scope">
+              <div class="athlete-cell">
+                <div class="athlete-photo">
+                  <img v-if="scope.row.foto" :src="getFotoUrl(scope.row.foto)" class="avatar-img">
+                  <i v-else class="el-icon-user" />
+                </div>
+                <div class="athlete-info">
+                  <span class="name">{{ scope.row.nombre }} {{ scope.row.apellido }}</span>
+                  <span class="category-tag">{{ scope.row.categoria_nombre }}</span>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="Estadísticas" min-width="300" align="center">
+            <template slot-scope="scope">
+              <div class="stats-mini-grid">
+                <div class="stat-box present" title="Asistencias">
+                  <i class="el-icon-check" /> {{ scope.row.stats.presente }}
+                </div>
+                <div class="stat-box absent" title="Inasistencias">
+                  <i class="el-icon-close" /> {{ scope.row.stats.ausente }}
+                </div>
+                <div class="stat-box justified" title="Justificadas">
+                  <i class="el-icon-warning-outline" /> {{ scope.row.stats.justificado }}
+                </div>
+                <div class="stat-box total" title="Total Eventos">
+                  <span class="label">Total:</span> {{ scope.row.stats.total }}
+                </div>
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="% Asistencia" width="160" align="center">
+            <template slot-scope="scope">
+              <div class="progress-col">
+                <el-progress
+                  :percentage="scope.row.stats.percentage"
+                  :color="getProgressColor(scope.row.stats.percentage)"
+                  :format="p => p + '%'"
+                  :stroke-width="18"
+                  text-inside
+                />
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="Acciones" width="150" align="center" class-name="no-print">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                type="primary"
+                plain
+                circle
+                icon="el-icon-view"
+                title="Ver Detalle"
+                @click="viewDetail(scope.row)"
+              />
+              <el-button
+                size="mini"
+                type="danger"
+                plain
+                circle
+                icon="el-icon-printer"
+                title="Imprimir Individual"
+                @click="printIndividual(scope.row)"
+              />
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <div v-if="filteredAthletesStats.length === 0" class="empty-state">
+          <p>No se encontraron datos coincidente con los filtros.</p>
+        </div>
+      </div>
+    </el-card>
+
+    <!-- Detailed Modal -->
+    <el-dialog
+      :visible.sync="showDetailModal"
+      width="700px"
+      append-to-body
+      custom-class="detail-modal"
+    >
+      <div slot="title" class="modal-header">
+        <span class="modal-title">Historial de Asistencia</span>
+        <span v-if="selectedAthlete" class="modal-subtitle">
+          {{ selectedAthlete.nombre }} {{ selectedAthlete.apellido }}
         </span>
       </div>
 
-      <div class="placeholder-content">
-        <el-empty description="Módulo en desarrollo">
-          <template slot="image">
-            <i class="el-icon-document-checked" style="font-size: 100px; color: #909399;" />
-          </template>
-          <p style="color: #909399; margin-top: 20px;">
-            Este módulo permitirá generar reportes de asistencia de los atletas.
-          </p>
-          <p style="color: #909399;">
-            Características próximas:
-          </p>
-          <ul style="color: #909399; text-align: left; display: inline-block;">
-            <li>Reporte de asistencia por atleta</li>
-            <li>Reporte de asistencia por categoría</li>
-            <li>Estadísticas de asistencia mensual</li>
-            <li>Exportación de datos</li>
-          </ul>
-        </el-empty>
+      <div v-if="selectedAthlete" class="modal-content">
+        <div class="print-only-header">
+          <h2>Reporte de Asistencia Individual</h2>
+          <p>Atleta: {{ selectedAthlete.nombre }} {{ selectedAthlete.apellido }}</p>
+          <p>Categoría: {{ selectedAthlete.categoria_nombre }}</p>
+        </div>
+
+        <div class="modal-summary">
+          <div class="summary-item">
+            <span class="label">Total Eventos</span>
+            <span class="value">{{ selectedAthlete.stats.total }}</span>
+          </div>
+          <div class="summary-item success">
+            <span class="label">Asistencias</span>
+            <span class="value">{{ selectedAthlete.stats.presente }}</span>
+          </div>
+          <div class="summary-item danger">
+            <span class="label">Faltas</span>
+            <span class="value">{{ selectedAthlete.stats.ausente }}</span>
+          </div>
+        </div>
+
+        <el-table
+          :data="selectedAthleteHistory"
+          height="400"
+          border
+          stripe
+          style="width: 100%"
+          class="detail-table"
+        >
+          <el-table-column prop="fecha" label="Fecha" width="120">
+            <template slot-scope="scope">
+              {{ formatDate(scope.row.fecha) }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="tipo_evento" label="Evento" width="140" />
+          <el-table-column prop="estatus" label="Estado" align="center">
+            <template slot-scope="scope">
+              <el-tag :type="getStatusType(scope.row.estatus)">
+                {{ getStatusLabel(scope.row.estatus) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="observaciones" label="Observaciones" show-overflow-tooltip />
+        </el-table>
       </div>
-    </el-card>
+
+      <div slot="footer" class="dialog-footer no-print">
+        <el-button @click="showDetailModal = false">Cerrar</el-button>
+        <el-button type="primary" icon="el-icon-printer" @click="printModal">Imprimir</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { getCategorias } from '@/api/categorias'
+import { getAtletas } from '@/api/atletas'
+import { getAsistencias } from '@/api/asistencias'
+
 export default {
-  name: 'AsistenciaAtletas',
+  name: 'AsistenciaReporte',
   data() {
-    return {}
+    return {
+      loading: false,
+      categorias: [],
+      atletas: [],
+      asistencias: [],
+      filters: {
+        categoria_id: '',
+        dateRange: [],
+        search: ''
+      },
+      showDetailModal: false,
+      selectedAthlete: null,
+      backendUrl: 'http://localhost:3000'
+    }
+  },
+  computed: {
+    selectedCategoryName() {
+      if (!this.filters.categoria_id) return 'Todas las Categorías'
+      const cat = this.categorias.find(c => c.categoria_id === this.filters.categoria_id)
+      return cat ? cat.nombre_categoria : ''
+    },
+    // Main aggregation logic
+    filteredAthletesStats() {
+      let filtered = this.atletas
+
+      // 1. Filter by Category
+      if (this.filters.categoria_id) {
+        filtered = filtered.filter(a => a.categoria_id === this.filters.categoria_id)
+      }
+
+      // 2. Filter by Search Text
+      if (this.filters.search) {
+        const q = this.filters.search.toLowerCase()
+        filtered = filtered.filter(a =>
+          a.nombre.toLowerCase().includes(q) ||
+          a.apellido.toLowerCase().includes(q)
+        )
+      }
+
+      // 3. Map aggregates
+      return filtered.map(atleta => {
+        // Get attendance records for this athlete within date range
+        const records = this.asistencias.filter(r => {
+          if (r.atleta_id !== atleta.atleta_id) return false
+
+          if (this.filters.dateRange && this.filters.dateRange.length === 2) {
+            const date = new Date(r.fecha)
+            const start = new Date(this.filters.dateRange[0])
+            const end = new Date(this.filters.dateRange[1])
+            // Normalize dates to ignore time
+            date.setHours(0, 0, 0, 0)
+            start.setHours(0, 0, 0, 0)
+            end.setHours(0, 0, 0, 0)
+            return date >= start && date <= end
+          }
+          return true
+        })
+
+        const total = records.length
+        const presente = records.filter(r => r.estatus === 'PRESENTE').length
+        const ausente = records.filter(r => r.estatus === 'AUSENTE').length
+        const justificado = records.filter(r => r.estatus === 'JUSTIFICADO').length
+
+        // Calculation: (Present / Total) * 100.
+        // Optional: Count Justified as 0.5 or ignore? Usually ignored or treated as authorized absence.
+        // Simple formula: Present / Total * 100
+        const percentage = total > 0 ? Math.round((presente / total) * 100) : 0
+
+        // Find Category Name
+        const cat = this.categorias.find(c => c.categoria_id === atleta.categoria_id)
+
+        return {
+          ...atleta,
+          categoria_nombre: cat ? cat.nombre_categoria : 'Sin asignar',
+          records, // Store for detailed view
+          stats: {
+            total,
+            presente,
+            ausente,
+            justificado,
+            percentage
+          }
+        }
+      })
+    },
+    selectedAthleteHistory() {
+      if (!this.selectedAthlete) return []
+      // Sort by date desc
+      return [...this.selectedAthlete.records].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+    }
+  },
+  created() {
+    this.initialLoad()
+  },
+  methods: {
+    async initialLoad() {
+      this.loading = true
+      try {
+        await Promise.all([
+          this.fetchCategorias(),
+          this.fetchAtletas(),
+          this.fetchAsistencias() // Gets all for now, efficient enough for < 1000 records. Ideally filter by date on API.
+        ])
+      } catch (error) {
+        console.error('Error loading report data:', error)
+        this.$message.error('Error cargando datos del reporte')
+      } finally {
+        this.loading = false
+      }
+    },
+    async fetchCategorias() {
+      this.categorias = await getCategorias()
+    },
+    async fetchAtletas() {
+      this.atletas = await getAtletas()
+    },
+    async fetchAsistencias() {
+      // Fetch all for client-side aggregation flexibility
+      // Optimization: filter by date params if dateRange is set initially
+      this.asistencias = await getAsistencias()
+    },
+    handleFilterChange() {
+      // Triggered on select change, mostly for explicit UX interaction
+      // Computed property handles the filtering automatically
+    },
+    viewDetail(row) {
+      this.selectedAthlete = row
+      this.showDetailModal = true
+    },
+    printIndividual(row) {
+      this.selectedAthlete = row
+      this.showDetailModal = true
+      // Add special class for modal printing
+      document.body.classList.add('print-modal-active')
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.printModal()
+        }, 500) // Wait for modal animation
+      })
+    },
+    printModal() {
+      document.body.classList.add('print-modal-active')
+      window.print()
+      // Cleanup after print dialog closes (approximate)
+      setTimeout(() => {
+        document.body.classList.remove('print-modal-active')
+      }, 1000)
+    },
+    handlePrint() {
+      window.print()
+    },
+    formatDate(date) {
+      if (!date) return '-'
+      return new Date(date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    },
+    getStatusType(estatus) {
+      const map = {
+        'PRESENTE': 'success',
+        'AUSENTE': 'danger',
+        'JUSTIFICADO': 'warning'
+      }
+      return map[estatus] || 'info'
+    },
+    getStatusLabel(estatus) {
+      const map = {
+        'PRESENTE': 'Presente',
+        'AUSENTE': 'Ausente',
+        'JUSTIFICADO': 'Justificado'
+      }
+      return map[estatus] || estatus
+    },
+    getProgressColor(per) {
+      if (per >= 80) return '#67C23A' // Success
+      if (per >= 50) return '#E6A23C' // Warning
+      return '#F56C6C' // Danger
+    },
+    getFotoUrl(filename) {
+      if (!filename) return ''
+      // If filename is full path (starts with /uploads), use it directly, else prepend
+      if (filename.startsWith('/uploads')) {
+        return `${this.backendUrl}${filename}`
+      }
+      return `${this.backendUrl}/uploads/atletas/${filename}`
+    }
   }
 }
 </script>
 
 <style scoped>
-.placeholder-content {
-  padding: 40px;
-  text-align: center;
+.asistencia-reporte-container {
+  padding: 20px;
+  min-height: 100vh;
 }
 
-.box-card {
+.page-header {
+  background: linear-gradient(135deg, #E51D22, #c41a1d);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(229, 29, 34, 0.2);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+}
+
+.subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Filters */
+.filters-card {
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.filters-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-item label {
+  display: block;
+  font-size: 0.9rem;
+  color: #606266;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.main-card {
   min-height: 500px;
+  border-radius: 8px;
+}
+
+/* Athlete Cell */
+.athlete-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.athlete-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid #dcdfe6;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.athlete-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.athlete-info .name {
+  font-weight: 600;
+  color: #303133;
+}
+
+.athlete-info .category-tag {
+  font-size: 0.75rem;
+  color: #909399;
+}
+
+/* Stats Mini Grid */
+.stats-mini-grid {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.stat-box {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-width: 50px;
+}
+
+.stat-box.present { background: #f0f9eb; color: #67C23A; }
+.stat-box.absent { background: #fef0f0; color: #F56C6C; }
+.stat-box.justified { background: #fdf6ec; color: #E6A23C; }
+.stat-box.total { background: #f4f4f5; color: #909399; }
+.stat-box i { margin-right: 2px; }
+
+/* Progress */
+.progress-col {
+  padding: 0 10px;
+}
+
+/* Modal Helpers */
+.modal-header {
+  display: flex;
+  flex-direction: column;
+}
+.modal-title { font-size: 1.2rem; font-weight: bold; color: #303133; }
+.modal-subtitle { font-size: 0.9rem; color: #909399; margin-top: 5px; }
+
+.modal-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.summary-item {
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+.summary-item.success { background: #f0f9eb; }
+.summary-item.danger { background: #fef0f0; }
+
+.summary-item .label { font-size: 0.8rem; color: #606266; margin-bottom: 5px; }
+.summary-item .value { font-size: 1.5rem; font-weight: bold; color: #303133; }
+
+.empty-state {
+  padding: 40px;
+  text-align: center;
+  color: #909399;
+}
+
+/* Print Styles */
+.print-only-header { display: none; }
+
+@media print {
+  .asistencia-reporte-container {
+    padding: 0;
+    margin: 0;
+  }
+
+  .main-card {
+    border: none;
+    box-shadow: none;
+  }
+
+  /* TABLE TWEAKS */
+  .el-table {
+    width: 100% !important;
+  }
+  .el-table th, .el-table td {
+    padding: 4px 0 !important;
+  }
+
+  /* PRINT HEADERS */
+  .print-only-header {
+    display: block !important;
+    text-align: center;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+
+  .print-only-header h2 { margin: 0 0 10px 0; font-size: 20px; }
+  .print-only-header p { margin: 2px 0; font-size: 14px; color: #555; }
 }
 </style>

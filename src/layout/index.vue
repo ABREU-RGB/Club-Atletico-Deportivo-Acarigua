@@ -8,6 +8,15 @@
         <tags-view v-if="needTagsView" />
       </div>
       <app-main />
+
+      <!-- Global Footer -->
+      <footer class="app-footer">
+        <div class="footer-content">
+          <p><strong>Club Atlético Deportivo Acarigua (CADA)</strong> - Sistema de Gestión Deportiva e Integral</p>
+          <p class="copyright">&copy; {{ new Date().getFullYear() }} Todos los derechos reservados.</p>
+        </div>
+      </footer>
+
       <right-panel v-if="showSettings">
         <settings />
       </right-panel>
@@ -60,6 +69,25 @@ export default {
 <style lang="scss" scoped>
   @import "~@/styles/mixin.scss";
   @import "~@/styles/variables.scss";
+
+  /* App Footer Global Styles */
+  .app-footer {
+    text-align: center;
+    color: #909399;
+    padding: 20px 0;
+    /* border-top removed as requested */
+    width: 100%;
+    background: #f0f2f5;
+  }
+
+  .footer-content p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+  }
+
+  .copyright {
+    font-size: 0.8rem;
+  }
 
   .app-wrapper {
     @include clearfix;
