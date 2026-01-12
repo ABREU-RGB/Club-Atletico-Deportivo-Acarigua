@@ -121,14 +121,6 @@
       </div>
     </div>
 
-    <!-- Restored Footer -->
-    <footer class="app-footer">
-      <div class="footer-content">
-        <p><strong>Club Atlético Deportivo Acarigua (CADA)</strong> - Sistema de Gestión Deportiva e Integral</p>
-        <p class="copyright">&copy; {{ new Date().getFullYear() }} Todos los derechos reservados.</p>
-      </div>
-    </footer>
-
     <!-- Detail Modal -->
     <el-dialog
       :visible.sync="showModal"
