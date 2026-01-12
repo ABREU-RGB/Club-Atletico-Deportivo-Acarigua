@@ -1,230 +1,278 @@
 <template>
   <div class="report-container">
-    <div class="container-fluid">
-      <!-- Header -->
-      <header class="page-header">
-        <div class="header-content">
-          <div class="club-logo">
-            <i class="el-icon-trophy" />
-          </div>
-          <div class="header-text">
-            <h1>Club Fútbol Pro</h1>
-            <p class="subtitle">Módulo de Reportes de Atletas</p>
-          </div>
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <div>
+          <h1><i class="el-icon-files" /> Reporte de Atletas</h1>
+          <p class="subtitle">Listado General y Fichas Técnicas</p>
         </div>
-      </header>
-
-      <div class="main-content">
-        <!-- Report Header -->
-        <div class="report-header">
-          <div class="report-title">
-            <i class="el-icon-data-line" />
-            <h2>Reporte Completo de Atletas</h2>
-          </div>
-          <div class="report-actions">
-            <el-button class="btn-custom btn-dark" icon="el-icon-refresh" :loading="loading" @click="fetchData">
-              Actualizar
-            </el-button>
-            <el-button class="btn-custom btn-info" icon="el-icon-download" @click="handleExport">
-              Exportar Excel
-            </el-button>
-            <el-button class="btn-custom btn-primary" icon="el-icon-printer" @click="handlePrint">
-              Imprimir
-            </el-button>
-          </div>
-        </div>
-
-        <!-- Filters Section -->
-        <div class="filters-section">
-          <div class="filters-header">
-            <h3><i class="el-icon-s-operation" /> Filtros Avanzados</h3>
-            <el-button type="text" class="reset-filters" icon="el-icon-refresh-left" @click="resetFilters">
-              Restablecer Filtros
-            </el-button>
-          </div>
-
-          <div class="filters-grid">
-            <div class="filter-group">
-              <label><i class="el-icon-medal" /> Categoría</label>
-              <el-select v-model="filters.category" placeholder="Todas las categorías" clearable>
-                <el-option label="Todas las categorías" value="all" />
-                <el-option v-for="cat in categories" :key="cat.categoria_id" :label="cat.nombre_categoria" :value="cat.categoria_id" />
-              </el-select>
-            </div>
-
-            <div class="filter-group">
-              <label><i class="el-icon-user" /> Posición</label>
-              <el-select v-model="filters.position" placeholder="Todas las posiciones" clearable>
-                <el-option label="Todas las posiciones" value="all" />
-                <el-option v-for="pos in positions" :key="pos" :label="pos" :value="pos" />
-              </el-select>
-            </div>
-
-            <div class="filter-group">
-              <label><i class="el-icon-first-aid-kit" /> Estado</label>
-              <el-select v-model="filters.status" placeholder="Todos los estados" clearable>
-                <el-option label="Todos los estados" value="all" />
-                <el-option label="Activo" value="ACTIVO" />
-                <el-option label="Lesionado" value="LESIONADO" />
-                <el-option label="Inactivo" value="INACTIVO" />
-                <el-option label="Suspendido" value="SUSPENDIDO" />
-              </el-select>
-            </div>
-
-            <div class="filter-group">
-              <label><i class="el-icon-date" /> Rango de Edad</label>
-              <el-select v-model="filters.age" placeholder="Todas las edades" clearable>
-                <el-option label="Todas las edades" value="all" />
-                <el-option label="Menores de 15" value="under15" />
-                <el-option label="15 a 17 años" value="15-17" />
-                <el-option label="18 a 20 años" value="18-20" />
-                <el-option label="Mayores de 20" value="over20" />
-              </el-select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Stats Summary -->
-        <div class="stats-summary">
-          <div class="stat-item">
-            <div class="stat-value">{{ stats.total }}</div>
-            <div class="stat-label">Total Atletas</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value text-success">{{ stats.active }}</div>
-            <div class="stat-label">Activos</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value text-warning">{{ stats.injured }}</div>
-            <div class="stat-label">Lesionados</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value text-primary">{{ stats.sub17 }}</div>
-            <div class="stat-label">Sub-15/17</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">{{ stats.avgAge }}</div>
-            <div class="stat-label">Edad Promedio</div>
-          </div>
-        </div>
-
-        <!-- Table -->
-        <div class="report-table-container">
-          <el-table
-            ref="athleteTable"
-            v-loading="loading"
-            :data="filteredAthletes"
-            style="width: 100%"
-            class="modern-table"
-            :header-cell-style="{background: '#f8fafc', color: '#1e293b', fontWeight: '700'}"
-            @selection-change="handleSelectionChange"
-          >
-            <el-table-column type="selection" width="55" align="center" />
-
-            <el-table-column label="Atleta" min-width="280">
-              <template slot-scope="{row}">
-                <div class="athlete-info">
-                  <div class="athlete-photo">
-                    <img v-if="row.foto" :src="getFotoUrl(row.foto)" class="avatar-img" @error="handleImgError">
-                    <i v-else class="el-icon-user-solid" />
-                  </div>
-                  <div class="athlete-details">
-                    <h4>{{ row.nombre }} {{ row.apellido }}</h4>
-                    <p><i class="el-icon-phone-outline" /> {{ row.telefono || 'Sin teléfono' }}</p>
-                    <p><i class="el-icon-place" /> {{ row.direccion || 'Sin dirección' }}</p>
-                  </div>
-                </div>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="Edad" width="100" align="center">
-              <template slot-scope="{row}">
-                {{ calculateAge(row.fecha_nacimiento) }} años
-              </template>
-            </el-table-column>
-
-            <el-table-column label="Posición" align="center">
-              <template slot-scope="{row}">
-                <span class="position-badge">{{ row.posicion_de_juego }}</span>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="Categoría" align="center">
-              <template slot-scope="{row}">
-                <el-tag :type="getCategoryTagType(row.categoria_nombre)" effect="light" class="category-badge">
-                  {{ row.categoria_nombre || 'Sin Asignar' }}
-                </el-tag>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="Estado" align="center">
-              <template slot-scope="{row}">
-                <div class="status-indicator">
-                  <span :class="['status-dot', getStatusClass(row.estatus)]" />
-                  {{ row.estatus }}
-                </div>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="Acciones" align="center" width="150" class-name="actions-cell">
-              <template>
-                <div class="action-buttons">
-                  <!-- Only visual buttons as per design requirement, functional as needed -->
-                  <el-tooltip content="Ver Detalles">
-                    <div class="action-btn action-view"><i class="el-icon-view" /></div>
-                  </el-tooltip>
-                  <el-tooltip content="Ficha Médica">
-                    <div class="action-btn action-medical"><i class="el-icon-first-aid-kit" /></div>
-                  </el-tooltip>
-                </div>
-              </template>
-            </el-table-column>
-          </el-table>
-        </div>
-
-        <!-- Print Options (Visible on screen, hidden on print) -->
-        <div class="print-options-section">
-          <div class="print-options-header">
-            <i class="el-icon-printer" style="font-size: 24px; color: #f59e0b;" />
-            <h3>Opciones de Impresión / Exportación</h3>
-          </div>
-          <p class="print-description">
-            Seleccione qué desea imprimir o exportar.
-          </p>
-          <div class="print-options-grid">
-            <div class="print-option-card">
-              <div class="print-option-header">
-                <div class="print-option-icon"><i class="el-icon-files" /></div>
-                <div>
-                  <div class="print-option-title">Reporte Completo</div>
-                  <div class="print-option-desc">Imprimir listado completo actual</div>
-                </div>
-              </div>
-              <el-button type="warning" plain icon="el-icon-printer" @click="handlePrint">Imprimir Todos</el-button>
-            </div>
-
-            <div class="print-option-card">
-              <div class="print-option-header">
-                <div class="print-option-icon"><i class="el-icon-check" /></div>
-                <div>
-                  <div class="print-option-title">Seleccionados</div>
-                  <div class="print-option-desc">Imprimir {{ selectedAthletes.length }} atletas seleccionados</div>
-                </div>
-              </div>
-              <el-button type="warning" plain icon="el-icon-printer" :disabled="selectedAthletes.length === 0" @click="handlePrintSelected">
-                Imprimir Selección
-              </el-button>
-            </div>
-          </div>
-        </div>
-
       </div>
-
-      <!-- Footer -->
-      <footer>
-        <p>Sistema de Gestión de Atletas - Club Fútbol Pro &copy; {{ new Date().getFullYear() }}</p>
-      </footer>
     </div>
+
+    <!-- Control Panel -->
+    <el-card class="control-panel" shadow="hover">
+      <div class="control-content">
+        <div class="filter-section">
+          <div class="filter-item">
+            <span class="filter-label"><i class="el-icon-medal" /> Categoría:</span>
+            <el-select v-model="filters.category" placeholder="Todas" clearable size="small" class="filter-select">
+              <el-option label="Todas" value="all" />
+              <el-option v-for="cat in categories" :key="cat.categoria_id" :label="cat.nombre_categoria" :value="cat.categoria_id" />
+            </el-select>
+          </div>
+
+          <div class="filter-item">
+            <span class="filter-label"><i class="el-icon-user" /> Posición:</span>
+            <el-select v-model="filters.position" placeholder="Todas" clearable size="small" class="filter-select">
+              <el-option label="Todas" value="all" />
+              <el-option v-for="pos in positions" :key="pos" :label="pos" :value="pos" />
+            </el-select>
+          </div>
+
+          <div class="filter-item">
+            <span class="filter-label"><i class="el-icon-first-aid-kit" /> Estatus:</span>
+            <el-select v-model="filters.status" placeholder="Todos" clearable size="small" class="filter-select">
+              <el-option label="Todos" value="all" />
+              <el-option label="Activo" value="ACTIVO" />
+              <el-option label="Lesionado" value="LESIONADO" />
+              <el-option label="Inactivo" value="INACTIVO" />
+              <el-option label="Suspendido" value="SUSPENDIDO" />
+            </el-select>
+          </div>
+
+          <div class="filter-item">
+            <span class="filter-label"><i class="el-icon-date" /> Edad:</span>
+            <el-select v-model="filters.age" placeholder="Todas" clearable size="small" class="filter-select">
+              <el-option label="Todas" value="all" />
+              <el-option label="< 15 años" value="under15" />
+              <el-option label="15 - 17 años" value="15-17" />
+              <el-option label="18 - 20 años" value="18-20" />
+              <el-option label="> 20 años" value="over20" />
+            </el-select>
+          </div>
+        </div>
+
+        <div class="actions-section">
+          <el-button type="info" size="small" icon="el-icon-refresh" :loading="loading" @click="fetchData">Actualizar</el-button>
+          <el-button type="success" size="small" icon="el-icon-document" @click="handleExport">Exportar Excel</el-button>
+          <el-button type="danger" size="small" icon="el-icon-printer" @click="handlePrintList">Imprimir Lista</el-button>
+        </div>
+      </div>
+    </el-card>
+
+    <!-- Main Table -->
+    <div class="table-container">
+      <el-table
+        v-loading="loading"
+        :data="filteredAthletes"
+        style="width: 100%"
+        :header-cell-style="{background: '#f5f7fa', color: '#324157', fontWeight: 'bold'}"
+        border
+        stripe
+      >
+        <el-table-column label="Atleta" min-width="250">
+          <template slot-scope="{row}">
+            <div class="athlete-cell">
+              <img v-if="row.foto" :src="getFotoUrl(row.foto)" class="cell-avatar" @error="handleImgError">
+              <div v-else class="cell-avatar-placeholder"><i class="el-icon-user" /></div>
+              <div class="athlete-name">
+                <span class="name">{{ row.nombre }} {{ row.apellido }}</span>
+                <span class="sub-text">{{ row.telefono || 'Sin teléfono' }}</span>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="Edad" width="80" align="center">
+          <template slot-scope="{row}">
+            {{ calculateAge(row.fecha_nacimiento) }}
+          </template>
+        </el-table-column>
+
+        <el-table-column label="Posición" align="center" min-width="120">
+          <template slot-scope="{row}">
+            <el-tag size="mini" type="info" effect="plain">{{ row.posicion_de_juego || 'N/A' }}</el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="Categoría" align="center" min-width="130">
+          <template slot-scope="{row}">
+            {{ row.categoria_nombre || '-' }}
+          </template>
+        </el-table-column>
+
+        <el-table-column label="Estatus" align="center" width="110">
+          <template slot-scope="{row}">
+            <el-tag size="small" :type="getStatusType(row.estatus)">{{ row.estatus }}</el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="Acciones" align="center" width="150">
+          <template slot-scope="{row}">
+            <el-button type="primary" circle size="small" icon="el-icon-view" title="Ver Detalles" @click="openDetailModal(row)" />
+            <el-button type="danger" circle size="small" icon="el-icon-printer" title="Imprimir Ficha" @click="handlePrintAthlete(row)" />
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="table-footer">
+        <span>Total: <strong>{{ filteredAthletes.length }}</strong> atletas</span>
+      </div>
+    </div>
+
+    <!-- Restored Footer -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <p><strong>Club Atlético Deportivo Acarigua (CADA)</strong> - Sistema de Gestión Deportiva e Integral</p>
+        <p class="copyright">&copy; {{ new Date().getFullYear() }} Todos los derechos reservados.</p>
+      </div>
+    </footer>
+
+    <!-- Detail Modal -->
+    <el-dialog
+      :visible.sync="showModal"
+      width="900px"
+      top="5vh"
+      custom-class="athlete-detail-modal"
+      :show-close="true"
+      append-to-body
+    >
+      <div v-if="selectedAthlete" id="printable-modal-content" class="modal-content-wrapper">
+        <!-- Printable Logo Header -->
+        <div class="print-only-header">
+          <div class="print-logo"><i class="el-icon-trophy" /></div>
+          <div class="print-title">
+            <h1>Club Atlético Deportivo Acarigua</h1>
+            <p>Ficha Técnica del Atleta</p>
+          </div>
+        </div>
+
+        <!-- Header Screen -->
+        <div class="modal-header-custom screen-only">
+          <div class="modal-title">
+            <h2><i class="el-icon-document" /> Ficha del Atleta</h2>
+          </div>
+        </div>
+
+        <!-- Personal / Header Section -->
+        <div class="section-block personal-section">
+          <div class="profile-header">
+            <div class="profile-photo-container">
+              <img v-if="selectedAthlete.foto" :src="getFotoUrl(selectedAthlete.foto)" class="profile-photo" @error="handleImgError">
+              <div v-else class="profile-placeholder"><i class="el-icon-user" /></div>
+            </div>
+            <div class="profile-main-info">
+              <h3 class="athlete-fullname">{{ selectedAthlete.nombre }} {{ selectedAthlete.apellido }}</h3>
+              <div class="tags-container">
+                <span class="info-tag category">{{ selectedAthlete.categoria_nombre }}</span>
+                <span class="info-tag position">{{ selectedAthlete.posicion_de_juego }}</span>
+                <span :class="['info-tag status', selectedAthlete.estatus ? selectedAthlete.estatus.toLowerCase() : '']">{{ selectedAthlete.estatus }}</span>
+              </div>
+              <div class="basic-details-grid">
+                <div class="detail-item"><strong>Edad:</strong> {{ calculateAge(selectedAthlete.fecha_nacimiento) }} años</div>
+                <div class="detail-item"><strong>Nacimiento:</strong> {{ formatDate(selectedAthlete.fecha_nacimiento) }}</div>
+                <div class="detail-item"><strong>Teléfono:</strong> {{ selectedAthlete.telefono || 'N/A' }}</div>
+                <div class="detail-item"><strong>Pierna:</strong> {{ selectedAthlete.pierna_dominante || 'N/A' }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="address-box">
+            <strong><i class="el-icon-location" /> Dirección:</strong> {{ selectedAthlete.direccion || 'Dirección no registrada' }}
+          </div>
+        </div>
+
+        <div class="sheets-container">
+          <!-- Medical Sheet -->
+          <div class="sheet-section">
+            <div class="sheet-title"><h4><i class="el-icon-first-aid-kit" /> Información Médica</h4></div>
+            <div v-if="selectedMedical" class="sheet-content">
+              <div class="info-grid-3">
+                <div class="info-item"><label>Tipo Sanguíneo</label><span>{{ selectedMedical.tipo_sanguineo || 'N/A' }}</span></div>
+                <div class="info-item"><label>Alergias</label><span>{{ selectedMedical.alergias || 'Ninguna' }}</span></div>
+                <div class="info-item"><label>Condición</label><span>{{ selectedMedical.condicion_medica || 'Ninguna' }}</span></div>
+              </div>
+              <div class="info-row">
+                <label>Lesiones:</label>
+                <p>{{ selectedMedical.lesion || 'Sin registro de lesiones' }}</p>
+              </div>
+              <div class="info-row">
+                <label>Observaciones:</label>
+                <p>{{ selectedMedical.observacion || 'Sin observaciones' }}</p>
+              </div>
+            </div>
+            <div v-else class="empty-sheet">No hay información médica registrada.</div>
+          </div>
+
+          <div class="dual-columns">
+            <!-- Anthropometric Sheet -->
+            <div class="sheet-section half">
+              <div class="sheet-title"><h4><i class="el-icon-guide" /> Antropometría</h4></div>
+              <div v-if="selectedMetrics" class="sheet-content">
+                <div class="metrics-grid">
+                  <div class="metric-box"><strong>Peso</strong><span>{{ selectedMetrics.peso }} kg</span></div>
+                  <div class="metric-box"><strong>Altura</strong><span>{{ selectedMetrics.altura }} cm</span></div>
+                  <div class="metric-box"><strong>IMC</strong><span>{{ selectedMetrics.indice_de_masa }}</span></div>
+                  <div class="metric-box"><strong>Envergadura</strong><span>{{ selectedMetrics.envergadura }} cm</span></div>
+                </div>
+                <div class="metric-row">
+                  <span>P. Pierna: <strong>{{ selectedMetrics.largo_de_pierna }} cm</strong></span> |
+                  <span>P. Torso: <strong>{{ selectedMetrics.largo_de_torso }} cm</strong></span>
+                </div>
+                <div class="metric-date">Medición: {{ formatDate(selectedMetrics.fecha_medicion) }}</div>
+              </div>
+              <div v-else class="empty-sheet">No hay medidas registradas.</div>
+            </div>
+
+            <!-- Performance Sheet -->
+            <div class="sheet-section half">
+              <div class="sheet-title"><h4><i class="el-icon-stopwatch" /> Rendimiento</h4></div>
+              <div v-if="selectedTest" class="sheet-content">
+                <div class="metrics-grid">
+                  <div class="metric-box performance"><strong>Fuerza</strong><span>{{ selectedTest.test_de_fuerza }}</span></div>
+                  <div class="metric-box performance"><strong>Resistencia</strong><span>{{ selectedTest.test_resistencia }}</span></div>
+                  <div class="metric-box performance"><strong>Velocidad</strong><span>{{ selectedTest.test_velocidad }}</span></div>
+                  <div class="metric-box performance"><strong>Coord.</strong><span>{{ selectedTest.test_coordinacion }}</span></div>
+                </div>
+                <div class="metric-row">
+                  <span>Reacción: <strong>{{ selectedTest.test_de_reaccion }}</strong></span>
+                </div>
+                <div class="metric-date">Test: {{ formatDate(selectedTest.fecha_test) }}</div>
+              </div>
+              <div v-else class="empty-sheet">No hay tests registrados.</div>
+            </div>
+          </div>
+
+          <!-- Tutor Sheet -->
+          <div class="sheet-section">
+            <div class="sheet-title"><h4><i class="el-icon-s-custom" /> Información del Tutor</h4></div>
+            <div v-if="selectedTutor" class="sheet-content">
+              <div class="info-grid-3">
+                <div class="info-item"><label>Nombre</label><span>{{ selectedTutor.nombre_completo }}</span></div>
+                <div class="info-item"><label>Relación</label><span>{{ selectedTutor.tipo_relacion }}</span></div>
+                <div class="info-item"><label>Teléfono</label><span>{{ selectedTutor.telefono }}</span></div>
+              </div>
+              <div class="info-row">
+                <label>Correo:</label> <span>{{ selectedTutor.correo || 'N/A' }}</span>
+              </div>
+              <div class="info-row">
+                <label>Dirección:</label> <span>{{ selectedTutor.direccion || 'No especificada' }}</span>
+              </div>
+            </div>
+            <div v-else class="empty-sheet">No hay tutor asignado.</div>
+          </div>
+        </div>
+
+        <div class="modal-footer-custom">
+          <p>Generado por Sistema de Gestión - CADA | {{ new Date().toLocaleDateString() }}</p>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showModal = false">Cerrar</el-button>
+        <el-button type="danger" icon="el-icon-printer" @click="printModal">Imprimir Ficha</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -237,7 +285,6 @@ export default {
     return {
       atletas: [],
       categories: [],
-      selectedAthletes: [],
       loading: false,
       backendUrl: 'http://localhost:3000',
       filters: {
@@ -245,27 +292,28 @@ export default {
         position: 'all',
         status: 'all',
         age: 'all'
-      }
+      },
+      // Modal Data
+      showModal: false,
+      activeTab: 'personal',
+      selectedAthlete: null,
+      selectedMedical: null,
+      selectedMetrics: null,
+      selectedTest: null,
+      selectedTutor: null
     }
   },
   computed: {
     positions() {
-      // Extract unique positions
       const pos = new Set(this.atletas.map(a => a.posicion_de_juego).filter(p => p))
       return Array.from(pos)
     },
     filteredAthletes() {
       return this.atletas.filter(athlete => {
-        // Category Filter
         if (this.filters.category !== 'all' && athlete.categoria_id !== this.filters.category) return false
-
-        // Position Filter
         if (this.filters.position !== 'all' && athlete.posicion_de_juego !== this.filters.position) return false
-
-        // Status Filter
         if (this.filters.status !== 'all' && athlete.estatus !== this.filters.status) return false
 
-        // Age Filter
         const age = this.calculateAge(athlete.fecha_nacimiento)
         if (this.filters.age !== 'all') {
           if (this.filters.age === 'under15' && age >= 15) return false
@@ -273,21 +321,8 @@ export default {
           if (this.filters.age === '18-20' && (age < 18 || age > 20)) return false
           if (this.filters.age === 'over20' && age <= 20) return false
         }
-
         return true
       })
-    },
-    stats() {
-      const list = this.filteredAthletes
-      const total = list.length
-      const active = list.filter(a => a.estatus === 'ACTIVO').length
-      const injured = list.filter(a => a.estatus === 'LESIONADO').length
-      const sub17 = list.filter(a => a.categoria_nombre && (a.categoria_nombre.includes('Sub 15') || a.categoria_nombre.includes('Sub 17'))).length
-
-      const totalAge = list.reduce((sum, a) => sum + this.calculateAge(a.fecha_nacimiento), 0)
-      const avgAge = total > 0 ? (totalAge / total).toFixed(1) : '0.0'
-
-      return { total, active, injured, sub17, avgAge }
     }
   },
   created() {
@@ -302,11 +337,9 @@ export default {
           request({ url: '/categoria', method: 'get' })
         ])
 
-        // Handle potential array response
         this.atletas = Array.isArray(atletasData) ? atletasData : []
         this.categories = Array.isArray(categoriasData) ? categoriasData : []
 
-        // enrich athletes with category name if needed (usually backend does join, but let's ensure)
         this.atletas.forEach(a => {
           const cat = this.categories.find(c => c.categoria_id === a.categoria_id)
           if (cat) a.categoria_nombre = cat.nombre_categoria
@@ -318,12 +351,39 @@ export default {
         this.loading = false
       }
     },
-    resetFilters() {
-      this.filters = {
-        category: 'all',
-        position: 'all',
-        status: 'all',
-        age: 'all'
+    async openDetailModal(athlete) {
+      this.selectedAthlete = athlete
+      this.selectedMedical = null
+      this.selectedMetrics = null
+      this.selectedTest = null
+      this.selectedTutor = null
+      this.activeTab = 'personal'
+      this.showModal = true // Show immediately with personal data
+
+      // Fetch details asynchronously
+      try {
+        // Corrected endpoint from previous error (was /ficha_medica 404)
+        const [medical, metrics, tests, tutors] = await Promise.all([
+          request({ url: `/ficha-medica`, method: 'get' }),
+          request({ url: `/mediciones?atleta_id=${athlete.atleta_id}`, method: 'get' }),
+          request({ url: `/tests?atleta_id=${athlete.atleta_id}`, method: 'get' }),
+          request({ url: `/tutor`, method: 'get' })
+        ])
+
+        if (Array.isArray(medical)) {
+          // If backend doesn't support filter param, find locally
+          this.selectedMedical = medical.find(m => m.atleta_id === athlete.atleta_id)
+        }
+
+        if (Array.isArray(metrics) && metrics.length > 0) this.selectedMetrics = metrics[metrics.length - 1]
+        if (Array.isArray(tests) && tests.length > 0) this.selectedTest = tests[0]
+
+        if (athlete.tutor_id && Array.isArray(tutors)) {
+          this.selectedTutor = tutors.find(t => t.tutor_id === athlete.tutor_id)
+        }
+      } catch (e) {
+        console.error('Error loading details', e)
+        this.$message.error('Error cargando detalles del atleta')
       }
     },
     calculateAge(dateString) {
@@ -337,43 +397,33 @@ export default {
       }
       return age
     },
+    formatDate(date) {
+      if (!date) return '-'
+      return new Date(date).toLocaleDateString('es-ES')
+    },
     getFotoUrl(filename) {
       return `${this.backendUrl}/uploads/atletas/${filename}`
     },
     handleImgError(e) {
-      // fallback if image fails
       e.target.style.display = 'none'
-      e.target.nextElementSibling.style.display = 'flex'
+      if (e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex'
     },
-    getStatusClass(status) {
-      if (status === 'ACTIVO') return 'status-active'
-      if (status === 'LESIONADO') return 'status-injured'
-      if (status === 'INACTIVO') return 'status-inactive'
-      return ''
-    },
-    getCategoryTagType(name) {
-      if (!name) return 'info'
-      if (name.includes('Sub 15')) return '' // default blueish
-      if (name.includes('Sub 17')) return 'success'
-      if (name.includes('Sub 19')) return 'warning'
+    getStatusType(status) {
+      if (status === 'ACTIVO') return 'success'
+      if (status === 'LESIONADO') return 'warning'
+      if (status === 'INACTIVO') return 'info'
+      if (status === 'SUSPENDIDO') return 'danger'
       return 'info'
-    },
-    handleSelectionChange(val) {
-      this.selectedAthletes = val
     },
     handleExport() {
       import('@/vendor/Export2Excel').then(excel => {
         const tHeader = ['Nombre', 'Apellido', 'Edad', 'Posición', 'Categoría', 'Teléfono', 'Estatus']
         const filterVal = ['nombre', 'apellido', 'age', 'posicion_de_juego', 'categoria_nombre', 'telefono', 'estatus']
-
-        // Prepare data with age calculation
         const dataToExport = this.filteredAthletes.map(a => ({
           ...a,
           age: this.calculateAge(a.fecha_nacimiento)
         }))
-
         const data = dataToExport.map(v => filterVal.map(j => v[j]))
-
         excel.export_json_to_excel({
           header: tHeader,
           data,
@@ -383,448 +433,483 @@ export default {
         })
       })
     },
-    handlePrint() {
-      window.print()
+    handlePrintList() {
+      // Logic to ensure only the list prints (by default behavior if modal closed)
+      if (this.showModal) this.showModal = false
+      // Remove specific modal print class if exists
+      document.body.classList.remove('printing-modal')
+      setTimeout(() => window.print(), 300)
     },
-    handlePrintSelected() {
-      // Implementation for printing only selected:
-      // Actually window.print() prints the current view.
-      // To print only selected, we would filter the view temporarily or open a new window.
-      // For simplicity in this adaptation, we will filter the view to show only selected, print, then restore.
-
-      // This is a bit tricky since filters logic is computed.
-      // A cleaner way for "Print Selected" in a web app is usually generating a PDF.
-      // But we can simulate by hiding non-selected rows via CSS or simple logic variable if user accepts.
-      // For now, let's just trigger print and let the user know it prints the current table.
-      this.$message.info('Preparando impresión...')
-      window.print()
+    async handlePrintAthlete(row) {
+      if (!this.showModal || this.selectedAthlete?.atleta_id !== row.atleta_id) {
+        await this.openDetailModal(row)
+      }
+      // Specific class to hide everything else but modal
+      this.printModal()
+    },
+    printModal() {
+      document.body.classList.add('printing-modal')
+      // Wait for render
+      this.$nextTick(() => {
+        // Print with delay to ensure DOM update
+        setTimeout(() => {
+          window.print()
+          // Cleanup
+          setTimeout(() => {
+            document.body.classList.remove('printing-modal')
+          }, 1000)
+        }, 800)
+      })
     }
   }
 }
 </script>
 
 <style scoped>
-/* CSS Variables Adaptation */
 .report-container {
-  /* Variables mapped to scope */
-  --primary-color: #1e3a8a;
-  --secondary-color: #3b82f6;
-  --accent-color: #f59e0b;
-  --light-color: #f8fafc;
-  --dark-color: #1e293b;
-  --success-color: #10b981;
-  --warning-color: #f59e0b;
-  --danger-color: #ef4444;
-  --info-color: #06b6d4;
-
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  padding: 20px;
+  background-color: #f0f2f5;
   min-height: 100vh;
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  padding-bottom: 40px;
 }
 
-.container-fluid {
-    width: 95%;
-    margin: 0 auto;
-    padding-top: 25px;
-}
-
-/* Header Styles */
+/* Header styled as per red theme */
 .page-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #1e40af 100%);
-    color: white;
-    padding: 30px 0;
-    margin-bottom: 35px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    position: relative;
-    overflow: hidden;
+  background: linear-gradient(135deg, #E51D22 0%, #a3161a 100%);
+  color: white;
+  padding: 25px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(229, 29, 34, 0.2);
 }
 
-.page-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 300px;
-    height: 300px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 50%;
-    transform: translate(30%, -30%);
-}
-
-.header-content {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: 0 30px;
-}
-
-.club-logo {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.15);
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    font-size: 1.8rem;
-    color: white;
-}
-
-.header-text {
-    text-align: left;
-}
-
-.page-header h1 {
-    font-size: 2.5rem;
-    margin: 0 0 5px 0;
-    font-weight: 700;
+.header-content h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .subtitle {
-    font-size: 1.1rem;
-    margin: 0;
-    opacity: 0.9;
-    font-weight: 400;
+  margin: 5px 0 0 32px;
+  opacity: 0.9;
+  font-size: 0.95rem;
 }
 
-/* Main Content */
-.main-content {
-    background-color: white;
-    border-radius: 10px;
-    padding: 35px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    margin-bottom: 30px;
+/* Control Panel Control Panel matching Rendimiento */
+.control-panel {
+  margin-bottom: 20px;
+  border-left: 5px solid #E51D22;
 }
 
-.report-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 35px;
-    padding-bottom: 25px;
-    border-bottom: 2px solid #f1f5f9;
+.control-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
-.report-title {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+.filter-section {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
 }
 
-.report-title i {
-    color: var(--secondary-color);
-    font-size: 2rem;
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.report-title h2 {
-    font-size: 1.8rem;
-    color: var(--dark-color);
-    font-weight: 700;
-    margin: 0;
+.filter-label {
+  font-weight: 600;
+  color: #324157;
+  font-size: 0.9rem;
 }
 
-.report-actions {
-    display: flex;
-    gap: 15px;
+.filter-select {
+  width: 150px;
 }
 
-.btn-custom {
-    font-weight: 600;
-    border-radius: 10px;
-    padding: 12px 20px;
+.actions-section {
+  display: flex;
+  gap: 10px;
 }
 
-.btn-dark { background-color: #374151; border-color: #374151; color: white; }
-.btn-info { background-color: #06b6d4; border-color: #06b6d4; color: white; }
-
-/* Filters */
-.filters-section {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    padding: 25px;
-    border-radius: 10px;
-    margin-bottom: 35px;
-    border: 1px solid #e2e8f0;
+/* Table */
+.table-container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
-.filters-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+.athlete-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.filters-header h3 {
-    margin: 0;
-    font-size: 1.3rem;
-    color: var(--dark-color);
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.cell-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
 }
 
-.filters-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 20px;
+.cell-avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f5f7fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #909399;
 }
 
-.filter-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: var(--dark-color);
-    font-size: 0.95rem;
+.athlete-name {
+  display: flex;
+  flex-direction: column;
 }
 
-.filter-group label i {
-    color: var(--secondary-color);
-    margin-right: 5px;
+.name {
+  font-weight: 600;
+  color: #324157;
 }
 
-/* Stats Summary */
-.stats-summary {
-    display: flex;
-    justify-content: space-between;
-    background: white;
-    padding: 22px;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    flex-wrap: wrap;
-    gap: 20px;
+.sub-text {
+  font-size: 0.8rem;
+  color: #909399;
 }
 
-.stat-item {
-    text-align: center;
-    flex: 1;
-    min-width: 140px;
+.table-footer {
+  margin-top: 15px;
+  text-align: right;
+  color: #606266;
+  font-size: 0.9rem;
 }
 
-.stat-value {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: var(--primary-color);
-    margin-bottom: 5px;
+/* Modal Styling */
+.modal-content-wrapper {
+  color: #333;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.stat-label {
-    font-size: 0.95rem;
-    color: #64748b;
-    font-weight: 600;
+.modal-header-custom {
+  border-bottom: 2px solid #E51D22;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
 }
 
-.text-success { color: var(--success-color); }
-.text-warning { color: var(--warning-color); }
-.text-primary { color: var(--secondary-color); }
-
-/* Table Styling */
-.report-table-container {
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    overflow: hidden;
-    margin-bottom: 30px;
+.modal-title h2 {
+  color: #E51D22;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.athlete-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+/* Personal Section */
+.section-block {
+  background: #fff;
+  margin-bottom: 20px;
 }
 
-.athlete-photo {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: white;
-    border: 2px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    color: #cbd5e1;
-    font-size: 1.5rem;
+.personal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-.avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.profile-header {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
 }
 
-.athlete-details h4 {
-    margin: 0 0 5px 0;
-    font-size: 1rem;
-    color: var(--dark-color);
+.profile-photo-container {
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 3px solid #eee;
 }
 
-.athlete-details p {
-    margin: 0;
-    font-size: 0.8rem;
-    color: #64748b;
+.profile-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.position-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    background-color: #f1f5f9;
-    color: #475569;
+.profile-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: #ccc;
 }
 
-.status-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 500;
+.profile-main-info {
+  flex: 1;
 }
 
-.status-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
+.athlete-fullname {
+  margin: 0 0 10px 0;
+  font-size: 1.8rem;
+  color: #E51D22;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 5px;
 }
 
-.status-active { background-color: var(--success-color); box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
-.status-injured { background-color: var(--warning-color); box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
-.status-inactive { background-color: #94a3b8; box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2); }
-
-.action-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
+.tags-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
-.action-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: white;
-    font-size: 0.9rem;
+.info-tag {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 
-.action-btn:hover { transform: translateY(-2px); }
-.action-view { background: linear-gradient(135deg, var(--secondary-color) 0%, #2563eb 100%); }
-.action-medical { background: linear-gradient(135deg, var(--info-color) 0%, #0891b2 100%); }
+.info-tag.category { background: #e6f7ff; color: #0050b3; }
+.info-tag.position { background: #fff7e6; color: #d46b08; }
+.info-tag.status { background: #f6ffed; color: #389e0d; }
+.info-tag.status.lesionado { background: #fff1f0; color: #cf1322; }
 
-/* Print Options */
-.print-options-section {
-    background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
-    padding: 25px;
-    border-radius: 10px;
-    border-left: 5px solid var(--warning-color);
+.basic-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  font-size: 0.95rem;
 }
 
-.print-options-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
+.address-box {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  border-left: 3px solid #ccc;
 }
 
-.print-options-header h3 {
-    margin: 0;
-    color: #92400e;
+/* Sheet Layout for other sections */
+.sheets-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-.print-options-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+.sheet-section {
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  overflow: hidden;
 }
 
-.print-option-card {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+.sheet-title {
+  background: #f5f7fa;
+  padding: 8px 15px;
+  border-bottom: 1px solid #e8e8e8;
 }
 
-.print-option-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
+.sheet-title h4 {
+  margin: 0;
+  color: #324157;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.print-option-icon {
-    width: 45px;
-    height: 45px;
-    background: rgba(245, 158, 11, 0.1);
-    color: var(--warning-color);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3rem;
+.sheet-content {
+  padding: 15px;
+  background: white;
 }
 
-.print-option-title { font-weight: 700; color: #1e293b; }
-.print-option-desc { font-size: 0.85rem; color: #64748b; }
-
-footer {
-    text-align: center;
-    margin-top: 40px;
-    color: #64748b;
-    font-size: 0.9rem;
+.info-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 10px;
 }
 
-/* Print Media Query */
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-item label {
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-item span {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+}
+
+.info-row {
+  margin-top: 8px;
+  display: flex;
+  gap: 5px;
+  font-size: 0.95rem;
+  border-top: 1px dashed #eee;
+  padding-top: 8px;
+}
+
+.info-row label {
+  font-weight: 700;
+  color: #555;
+}
+
+.info-row p {
+  margin: 0;
+  color: #333;
+}
+
+/* Metrics */
+.dual-columns {
+  display: flex;
+  gap: 15px;
+}
+
+.dual-columns .half {
+  flex: 1;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.metric-box {
+  border: 1px solid #eee;
+  padding: 8px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.metric-box strong {
+  display: block;
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.metric-box span {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #324157;
+}
+
+.metric-box.performance span {
+  color: #E51D22;
+}
+
+.metric-row {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.metric-date {
+  margin-top: 10px;
+  text-align: right;
+  font-size: 0.75rem;
+  color: #aaa;
+  font-style: italic;
+}
+
+.empty-sheet {
+  padding: 20px;
+  text-align: center;
+  color: #ccc;
+  font-style: italic;
+}
+
+.print-only-header {
+  display: none;
+}
+
+.modal-footer-custom {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.7rem;
+  color: #ccc;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+/* Footer for App */
+.app-footer {
+  margin-top: 40px;
+  text-align: center;
+  color: #909399;
+  padding: 20px 0;
+  border-top: 1px solid #e6e6e6;
+}
+
+.footer-content p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+.copyright {
+  font-size: 0.8rem;
+}
+
+</style>
+
+<style>
+/* Global Print Styles specific for this page */
 @media print {
-    .report-actions,
-    .filters-section,
-    .print-options-section,
-    footer,
-    .sidebar-container,
-    .navbar,
-    .tags-view-container {
-        display: none !important;
-    }
+   /* Hide Layout Elements Global */
+   .sidebar-container, .navbar, .tags-view-container, .app-main > .header { display: none !important; }
 
-    .main-content {
-        box-shadow: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
+   /* Default Print: List View */
+   /* If NOT printing modal, hide controls but show list */
+   body:not(.printing-modal) .control-panel,
+   body:not(.printing-modal) .actions-section,
+   body:not(.printing-modal) .el-button { display: none !important; }
 
-    .report-table-container {
-        border: none !important;
-    }
+   body:not(.printing-modal) .report-container { background: white !important; padding: 0 !important; }
+   body:not(.printing-modal) .table-container { box-shadow: none !important; padding: 0 !important; }
 
-    .report-container {
-        background: white !important;
-        padding: 0 !important;
-    }
+   /* Modal Print specific */
+   body.printing-modal > *:not(.el-dialog__wrapper) { display: none !important; } /* Hide everything on body level except dialog wrapper */
+   body.printing-modal .el-dialog__wrapper { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: white !important; z-index: 99999 !important; display: block !important; }
+   body.printing-modal .el-dialog { margin: 0 !important; width: 100% !important; box-shadow: none !important; margin-top: 0 !important; }
 
-    .page-header {
-        padding: 10px !important;
-        margin-bottom: 15px !important;
-        box-shadow: none !important;
-        color: black !important;
-        background: white !important;
-        border-bottom: 2px solid #ccc;
-    }
+   body.printing-modal .el-dialog__headerbtn,
+   body.printing-modal .el-dialog__footer { display: none !important; }
 
-    .page-header::before { display: none; }
+   body.printing-modal .print-only-header { display: flex !important; justify-content: center; align-items: center; gap: 15px; margin-bottom: 30px; border-bottom: 3px solid #E51D22; padding-bottom: 20px; }
+   body.printing-modal .print-logo { font-size: 3rem; color: #E51D22; }
+   body.printing-modal .print-title h1 { margin: 0; color: #324157; font-size: 1.8rem; }
+   body.printing-modal .print-title p { margin: 0; color: #888; letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; }
 
-    .header-content h1 {
-        font-size: 2rem !important;
-        color: black !important;
-    }
+   body.printing-modal .screen-only { display: none !important; }
+   body.printing-modal .sheet-section { border: 1px solid #ccc; break-inside: avoid; }
+   body.printing-modal .sheet-title { background: #eee; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-    .subtitle { color: #555 !important; }
+   /* Colors fix for print */
+   .info-tag { border: 1px solid #ccc; }
 }
 </style>
