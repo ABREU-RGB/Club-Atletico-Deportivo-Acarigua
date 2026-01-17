@@ -41,7 +41,11 @@ const getAtletas = async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error('Error obteniendo atletas:', error);
-    res.status(500).json({ error: 'Error al obtener atletas' });
+    res.status(500).json({
+      error: 'Error al obtener atletas',
+      details: error.message,
+      sqlMessage: error.sqlMessage || 'No SQL message'
+    });
   }
 };
 
