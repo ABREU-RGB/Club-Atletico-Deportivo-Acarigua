@@ -270,7 +270,7 @@ export default {
 
       i {
         margin-right: 10px;
-        color: #E51D22;
+        color: #7B2D3A;
       }
     }
 

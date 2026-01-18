@@ -30,6 +30,7 @@ const pagosRoutes = require('./routes/pagos');
 const plantelRoutes = require('./routes/plantel');
 const tutorRoutes = require('./routes/tutor');
 const rolesRoutes = require('./routes/roles');
+const posicionesRoutes = require('./routes/posiciones');
 
 // Usar rutas existentes
 app.use('/api/usuarios', usuariosRoutes);
@@ -47,6 +48,7 @@ app.use('/api/pagos', pagosRoutes);
 app.use('/api/plantel', plantelRoutes);
 app.use('/api/tutor', tutorRoutes);
 app.use('/api/roles', rolesRoutes);
+app.use('/api/posiciones', posicionesRoutes);
 
 // Ruta de prueba
 app.get('/api', (req, res) => {
@@ -67,7 +69,8 @@ app.get('/api', (req, res) => {
       pagos: '/api/pagos',
       plantel: '/api/plantel',
       tutor: '/api/tutor',
-      roles: '/api/roles'
+      roles: '/api/roles',
+      posiciones: '/api/posiciones'
     }
   });
 });
@@ -110,4 +113,5 @@ app.listen(PORT, () => {
   console.log('   - Plantel: /api/plantel');
   console.log('   - Tutores: /api/tutor');
   console.log('   - Roles: /api/roles');
+  console.log('   - Posiciones: /api/posiciones');
 });

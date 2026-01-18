@@ -244,7 +244,7 @@ export default {
 }
 
 .page-header {
-  background: linear-gradient(135deg, #E51D22, #c41a1d);
+  background: linear-gradient(135deg, #7B2D3A, #7B2D3A);
   color: white;
   padding: 20px;
   border-radius: 10px;
@@ -281,7 +281,7 @@ export default {
 }
 
 .rol-name i {
-  color: #E51D22;
+  color: #7B2D3A;
   font-size: 1.1rem;
 }
 
@@ -290,20 +290,20 @@ export default {
 }
 
 ::v-deep .el-button--primary {
-  background-color: #E51D22;
-  border-color: #E51D22;
+  background-color: #7B2D3A;
+  border-color: #7B2D3A;
 }
 
 ::v-deep .el-button--primary:hover,
 ::v-deep .el-button--primary:focus {
-  background-color: #c41a1d;
-  border-color: #c41a1d;
+  background-color: #7B2D3A;
+  border-color: #7B2D3A;
 }
 
 ::v-deep .el-tag--primary {
   background-color: rgba(229, 29, 34, 0.1);
   border-color: rgba(229, 29, 34, 0.2);
-  color: #E51D22;
+  color: #7B2D3A;
 }
 
 ::v-deep .el-table th {
@@ -313,13 +313,13 @@ export default {
 }
 
 ::v-deep .el-table .el-button--primary.is-circle {
-  background-color: #E51D22;
-  border-color: #E51D22;
+  background-color: #7B2D3A;
+  border-color: #7B2D3A;
 }
 
 ::v-deep .el-table .el-button--primary.is-circle:hover {
-  background-color: #c41a1d;
-  border-color: #c41a1d;
+  background-color: #7B2D3A;
+  border-color: #7B2D3A;
 }
 ::v-deep .el-table .el-table__fixed-right::before,
 ::v-deep .el-table .el-table__fixed::before {

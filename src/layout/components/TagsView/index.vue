@@ -247,9 +247,9 @@ export default {
       }
 
       &.active {
-        background-color: #E51D22; /* Rojo igual que navbar */
+        background-color: #7B2D3A; /* Rojo igual que navbar */
         color: #fff;
-        border-color: #E51D22;
+        border-color: #7B2D3A;
         font-weight: 500;
 
         /* Eliminado el punto blanco anterior */
@@ -294,7 +294,7 @@ export default {
 
       &:hover {
         background: rgba(229, 29, 34, 0.08);
-        color: #E51D22;
+        color: #7B2D3A;
       }
     }
   }
@@ -324,7 +324,7 @@ export default {
 
       &:hover {
         background-color: rgba(229, 29, 34, 0.1);
-        color: #E51D22;
+        color: #7B2D3A;
         transform: scale(1.1);
       }
     }

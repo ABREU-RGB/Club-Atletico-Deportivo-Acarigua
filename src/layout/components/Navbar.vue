@@ -61,7 +61,7 @@ export default {
   height: 60px;
   overflow: hidden;
   position: relative;
-  background: #E51D22;
+  background: #7B2D3A;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
@@ -137,7 +137,7 @@ export default {
 
     &:hover {
       background: rgba(229, 29, 34, 0.08);
-      color: #E51D22;
+      color: #7B2D3A;
     }
 
     &[divided] {

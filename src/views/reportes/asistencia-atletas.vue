@@ -73,7 +73,9 @@
         <!-- Summary Stats (Optional Global Header for Print) -->
         <div class="print-only-header">
           <h1>Reporte de Asistencia</h1>
-          <p v-if="selectedCategoryName">Categoría: {{ selectedCategoryName }}</p>
+          <p v-if="selectedCategoryName">
+            Categoría: {{ selectedCategoryName }}
+          </p>
           <p class="date">Generado el: {{ new Date().toLocaleDateString() }}</p>
         </div>
 
@@ -82,18 +84,30 @@
           style="width: 100%"
           border
           stripe
-          :header-cell-style="{background: '#f8fafc', color: '#324157', fontWeight: 'bold'}"
+          :header-cell-style="{
+            background: '#f8fafc',
+            color: '#324157',
+            fontWeight: 'bold',
+          }"
         >
           <el-table-column label="Atleta" min-width="250">
             <template slot-scope="scope">
               <div class="athlete-cell">
                 <div class="athlete-photo">
-                  <img v-if="scope.row.foto" :src="getFotoUrl(scope.row.foto)" class="avatar-img">
+                  <img
+                    v-if="scope.row.foto"
+                    :src="getFotoUrl(scope.row.foto)"
+                    class="avatar-img"
+                  >
                   <i v-else class="el-icon-user" />
                 </div>
                 <div class="athlete-info">
-                  <span class="name">{{ scope.row.nombre }} {{ scope.row.apellido }}</span>
-                  <span class="category-tag">{{ scope.row.categoria_nombre }}</span>
+                  <span
+                    class="name"
+                  >{{ scope.row.nombre }} {{ scope.row.apellido }}</span>
+                  <span class="category-tag">{{
+                    scope.row.categoria_nombre
+                  }}</span>
                 </div>
               </div>
             </template>
@@ -109,7 +123,8 @@
                   <i class="el-icon-close" /> {{ scope.row.stats.ausente }}
                 </div>
                 <div class="stat-box justified" title="Justificadas">
-                  <i class="el-icon-warning-outline" /> {{ scope.row.stats.justificado }}
+                  <i class="el-icon-warning-outline" />
+                  {{ scope.row.stats.justificado }}
                 </div>
                 <div class="stat-box total" title="Total Eventos">
                   <span class="label">Total:</span> {{ scope.row.stats.total }}
@@ -124,7 +139,7 @@
                 <el-progress
                   :percentage="scope.row.stats.percentage"
                   :color="getProgressColor(scope.row.stats.percentage)"
-                  :format="p => p + '%'"
+                  :format="(p) => p + '%'"
                   :stroke-width="18"
                   text-inside
                 />
@@ -132,7 +147,12 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="Acciones" width="150" align="center" class-name="no-print">
+          <el-table-column
+            label="Acciones"
+            width="150"
+            align="center"
+            class-name="no-print"
+          >
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -179,7 +199,9 @@
       <div v-if="selectedAthlete" class="modal-content">
         <div class="print-only-header">
           <h2>Reporte de Asistencia Individual</h2>
-          <p>Atleta: {{ selectedAthlete.nombre }} {{ selectedAthlete.apellido }}</p>
+          <p>
+            Atleta: {{ selectedAthlete.nombre }} {{ selectedAthlete.apellido }}
+          </p>
           <p>Categoría: {{ selectedAthlete.categoria_nombre }}</p>
         </div>
 
@@ -219,13 +241,21 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="observaciones" label="Observaciones" show-overflow-tooltip />
+          <el-table-column
+            prop="observaciones"
+            label="Observaciones"
+            show-overflow-tooltip
+          />
         </el-table>
       </div>
 
       <div slot="footer" class="dialog-footer no-print">
         <el-button @click="showDetailModal = false">Cerrar</el-button>
-        <el-button type="primary" icon="el-icon-printer" @click="printModal">Imprimir</el-button>
+        <el-button
+          type="primary"
+          icon="el-icon-printer"
+          @click="printModal"
+        >Imprimir</el-button>
       </div>
     </el-dialog>
   </div>
@@ -257,7 +287,9 @@ export default {
   computed: {
     selectedCategoryName() {
       if (!this.filters.categoria_id) return 'Todas las Categorías'
-      const cat = this.categorias.find(c => c.categoria_id === this.filters.categoria_id)
+      const cat = this.categorias.find(
+        (c) => c.categoria_id === this.filters.categoria_id
+      )
       return cat ? cat.nombre_categoria : ''
     },
     // Main aggregation logic
@@ -266,22 +298,25 @@ export default {
 
       // 1. Filter by Category
       if (this.filters.categoria_id) {
-        filtered = filtered.filter(a => a.categoria_id === this.filters.categoria_id)
+        filtered = filtered.filter(
+          (a) => a.categoria_id === this.filters.categoria_id
+        )
       }
 
       // 2. Filter by Search Text
       if (this.filters.search) {
         const q = this.filters.search.toLowerCase()
-        filtered = filtered.filter(a =>
-          a.nombre.toLowerCase().includes(q) ||
-          a.apellido.toLowerCase().includes(q)
+        filtered = filtered.filter(
+          (a) =>
+            a.nombre.toLowerCase().includes(q) ||
+            a.apellido.toLowerCase().includes(q)
         )
       }
 
       // 3. Map aggregates
-      return filtered.map(atleta => {
+      return filtered.map((atleta) => {
         // Get attendance records for this athlete within date range
-        const records = this.asistencias.filter(r => {
+        const records = this.asistencias.filter((r) => {
           if (r.atleta_id !== atleta.atleta_id) return false
 
           if (this.filters.dateRange && this.filters.dateRange.length === 2) {
@@ -298,9 +333,11 @@ export default {
         })
 
         const total = records.length
-        const presente = records.filter(r => r.estatus === 'PRESENTE').length
-        const ausente = records.filter(r => r.estatus === 'AUSENTE').length
-        const justificado = records.filter(r => r.estatus === 'JUSTIFICADO').length
+        const presente = records.filter((r) => r.estatus === 'PRESENTE').length
+        const ausente = records.filter((r) => r.estatus === 'AUSENTE').length
+        const justificado = records.filter(
+          (r) => r.estatus === 'JUSTIFICADO'
+        ).length
 
         // Calculation: (Present / Total) * 100.
         // Optional: Count Justified as 0.5 or ignore? Usually ignored or treated as authorized absence.
@@ -308,7 +345,9 @@ export default {
         const percentage = total > 0 ? Math.round((presente / total) * 100) : 0
 
         // Find Category Name
-        const cat = this.categorias.find(c => c.categoria_id === atleta.categoria_id)
+        const cat = this.categorias.find(
+          (c) => c.categoria_id === atleta.categoria_id
+        )
 
         return {
           ...atleta,
@@ -327,7 +366,9 @@ export default {
     selectedAthleteHistory() {
       if (!this.selectedAthlete) return []
       // Sort by date desc
-      return [...this.selectedAthlete.records].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+      return [...this.selectedAthlete.records].sort(
+        (a, b) => new Date(b.fecha) - new Date(a.fecha)
+      )
     }
   },
   created() {
@@ -392,21 +433,25 @@ export default {
     },
     formatDate(date) {
       if (!date) return '-'
-      return new Date(date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      return new Date(date).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
     },
     getStatusType(estatus) {
       const map = {
-        'PRESENTE': 'success',
-        'AUSENTE': 'danger',
-        'JUSTIFICADO': 'warning'
+        PRESENTE: 'success',
+        AUSENTE: 'danger',
+        JUSTIFICADO: 'warning'
       }
       return map[estatus] || 'info'
     },
     getStatusLabel(estatus) {
       const map = {
-        'PRESENTE': 'Presente',
-        'AUSENTE': 'Ausente',
-        'JUSTIFICADO': 'Justificado'
+        PRESENTE: 'Presente',
+        AUSENTE: 'Ausente',
+        JUSTIFICADO: 'Justificado'
       }
       return map[estatus] || estatus
     },
@@ -434,7 +479,7 @@ export default {
 }
 
 .page-header {
-  background: linear-gradient(135deg, #E51D22, #c41a1d);
+  background: linear-gradient(135deg, #7B2D3A, #7B2D3A);
   color: white;
   padding: 20px;
   border-radius: 10px;
@@ -480,10 +525,77 @@ export default {
 
 .filter-item label {
   display: block;
-  font-size: 0.9rem;
-  color: #606266;
+  font-size: 0.85rem;
+  color: #1e293b;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Estilos prominentes para campos de filtro */
+.filter-item ::v-deep .el-input__inner,
+.filter-item ::v-deep .el-select .el-input__inner,
+.filter-item ::v-deep .el-range-input {
+  background-color: #ffffff !important;
+  border: 2px solid #94a3b8 !important;
+  border-radius: 8px;
+  color: #1e293b !important;
   font-weight: 600;
-  margin-bottom: 5px;
+  font-size: 0.95rem;
+  padding: 12px 15px;
+  height: auto;
+  line-height: 1.5;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.filter-item ::v-deep .el-date-editor .el-range-input {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0;
+}
+
+.filter-item ::v-deep .el-date-editor.el-input__inner {
+  padding: 8px 15px;
+}
+
+.filter-item ::v-deep .el-input__inner:hover,
+.filter-item ::v-deep .el-select .el-input__inner:hover {
+  border-color: #64748b !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.filter-item ::v-deep .el-input__inner:focus,
+.filter-item ::v-deep .el-select .el-input.is-focus .el-input__inner {
+  border-color: #7B2D3A !important;
+  box-shadow: 0 0 0 3px rgba(229, 29, 34, 0.15);
+}
+
+.filter-item ::v-deep .el-input__inner::placeholder {
+  color: #64748b !important;
+  font-weight: 500;
+}
+
+.filter-item.search-box ::v-deep .el-input__prefix {
+  left: 12px;
+  color: #7B2D3A !important;
+  font-size: 1.1rem;
+}
+
+.filter-item.search-box ::v-deep .el-input__inner {
+  padding-left: 40px;
+}
+
+.filter-item ::v-deep .el-select .el-input .el-select__caret {
+  color: #7B2D3A !important;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.filter-item ::v-deep .el-date-editor .el-range__icon {
+  color: #7B2D3A !important;
 }
 
 .main-card {
@@ -546,11 +658,25 @@ export default {
   min-width: 50px;
 }
 
-.stat-box.present { background: #f0f9eb; color: #67C23A; }
-.stat-box.absent { background: #fef0f0; color: #F56C6C; }
-.stat-box.justified { background: #fdf6ec; color: #E6A23C; }
-.stat-box.total { background: #f4f4f5; color: #909399; }
-.stat-box i { margin-right: 2px; }
+.stat-box.present {
+  background: #f0f9eb;
+  color: #67c23a;
+}
+.stat-box.absent {
+  background: #fef0f0;
+  color: #f56c6c;
+}
+.stat-box.justified {
+  background: #fdf6ec;
+  color: #e6a23c;
+}
+.stat-box.total {
+  background: #f4f4f5;
+  color: #909399;
+}
+.stat-box i {
+  margin-right: 2px;
+}
 
 /* Progress */
 .progress-col {
@@ -562,8 +688,16 @@ export default {
   display: flex;
   flex-direction: column;
 }
-.modal-title { font-size: 1.2rem; font-weight: bold; color: #303133; }
-.modal-subtitle { font-size: 0.9rem; color: #909399; margin-top: 5px; }
+.modal-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #303133;
+}
+.modal-subtitle {
+  font-size: 0.9rem;
+  color: #909399;
+  margin-top: 5px;
+}
 
 .modal-summary {
   display: grid;
@@ -580,11 +714,23 @@ export default {
   display: flex;
   flex-direction: column;
 }
-.summary-item.success { background: #f0f9eb; }
-.summary-item.danger { background: #fef0f0; }
+.summary-item.success {
+  background: #f0f9eb;
+}
+.summary-item.danger {
+  background: #fef0f0;
+}
 
-.summary-item .label { font-size: 0.8rem; color: #606266; margin-bottom: 5px; }
-.summary-item .value { font-size: 1.5rem; font-weight: bold; color: #303133; }
+.summary-item .label {
+  font-size: 0.8rem;
+  color: #606266;
+  margin-bottom: 5px;
+}
+.summary-item .value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #303133;
+}
 
 .empty-state {
   padding: 40px;
@@ -593,7 +739,9 @@ export default {
 }
 
 /* Print Styles */
-.print-only-header { display: none; }
+.print-only-header {
+  display: none;
+}
 
 @media print {
   .asistencia-reporte-container {
@@ -610,7 +758,8 @@ export default {
   .el-table {
     width: 100% !important;
   }
-  .el-table th, .el-table td {
+  .el-table th,
+  .el-table td {
     padding: 4px 0 !important;
   }
 
@@ -623,7 +772,14 @@ export default {
     margin-bottom: 20px;
   }
 
-  .print-only-header h2 { margin: 0 0 10px 0; font-size: 20px; }
-  .print-only-header p { margin: 2px 0; font-size: 14px; color: #555; }
+  .print-only-header h2 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+  }
+  .print-only-header p {
+    margin: 2px 0;
+    font-size: 14px;
+    color: #555;
+  }
 }
 </style>

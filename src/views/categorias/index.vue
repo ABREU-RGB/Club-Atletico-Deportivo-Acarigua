@@ -12,7 +12,7 @@
             v-if="canUserEdit"
             type="primary"
             icon="el-icon-plus"
-            class="red-btn"
+            class="header-action-btn"
             @click="nuevaCategoria"
           >
             Nueva Categoría
@@ -36,7 +36,12 @@
 
         <div class="control-item filter-box">
           <label>Filtrar por Entrenador</label>
-          <el-select v-model="filtroEntrenador" placeholder="Todos los entrenadores" clearable filterable>
+          <el-select
+            v-model="filtroEntrenador"
+            placeholder="Todos los entrenadores"
+            clearable
+            filterable
+          >
             <el-option
               v-for="ent in entrenadores"
               :key="ent.plantel_id"
@@ -82,8 +87,17 @@
                 <i class="el-icon-more transform-icon" />
               </span>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="edit" icon="el-icon-edit" :disabled="!canUserEdit">Editar</el-dropdown-item>
-                <el-dropdown-item command="delete" icon="el-icon-delete" :disabled="!canUserEdit" style="color: #F56C6C">Eliminar</el-dropdown-item>
+                <el-dropdown-item
+                  command="edit"
+                  icon="el-icon-edit"
+                  :disabled="!canUserEdit"
+                >Editar</el-dropdown-item>
+                <el-dropdown-item
+                  command="delete"
+                  icon="el-icon-delete"
+                  :disabled="!canUserEdit"
+                  style="color: #f56c6c"
+                >Eliminar</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
           </div>
@@ -92,17 +106,25 @@
         <div class="card-body">
           <div class="info-row">
             <span class="label"><i class="el-icon-user" /> Entrenador</span>
-            <span class="value">{{ getEntrenadorName(cat.entrenador_id) }}</span>
+            <span class="value">{{
+              getEntrenadorName(cat.entrenador_id)
+            }}</span>
           </div>
 
           <div class="info-row">
-            <span class="label"><i class="el-icon-s-cooperation" /> Atletas</span>
+            <span
+              class="label"
+            ><i class="el-icon-s-cooperation" /> Atletas</span>
             <span class="value">{{ cat.total_atletas || 0 }} Registrados</span>
           </div>
 
           <div class="progress-section">
             <div class="progress-label">Ocupación</div>
-            <el-progress :percentage="50" :format="() => ''" :color="'#E51D22'" />
+            <el-progress
+              :percentage="50"
+              :format="() => ''"
+              :color="'#7B2D3A'"
+            />
           </div>
         </div>
       </el-card>
@@ -116,22 +138,45 @@
       custom-class="category-dialog"
       :close-on-click-modal="false"
     >
-      <el-form ref="form" :model="formulario" label-position="top" :rules="rules">
+      <el-form
+        ref="form"
+        :model="formulario"
+        label-position="top"
+        :rules="rules"
+      >
         <el-form-item label="Nombre de Categoría" prop="nombre_categoria">
-          <el-input v-model="formulario.nombre_categoria" placeholder="Ej: Sub-12" />
+          <el-input
+            v-model="formulario.nombre_categoria"
+            placeholder="Ej: Sub-12"
+          />
         </el-form-item>
 
         <div class="form-row-2">
           <el-form-item label="Edad Mínima" prop="edad_min">
-            <el-input-number v-model="formulario.edad_min" :min="4" :max="20" style="width: 100%" />
+            <el-input-number
+              v-model="formulario.edad_min"
+              :min="4"
+              :max="20"
+              style="width: 100%"
+            />
           </el-form-item>
           <el-form-item label="Edad Máxima" prop="edad_max">
-            <el-input-number v-model="formulario.edad_max" :min="4" :max="20" style="width: 100%" />
+            <el-input-number
+              v-model="formulario.edad_max"
+              :min="4"
+              :max="20"
+              style="width: 100%"
+            />
           </el-form-item>
         </div>
 
         <el-form-item label="Entrenador Responsable" prop="entrenador_id">
-          <el-select v-model="formulario.entrenador_id" placeholder="Seleccionar" style="width: 100%" filterable>
+          <el-select
+            v-model="formulario.entrenador_id"
+            placeholder="Seleccionar"
+            style="width: 100%"
+            filterable
+          >
             <el-option
               v-for="ent in entrenadores"
               :key="ent.plantel_id"
@@ -143,12 +188,16 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="mostrarModal = false">Cancelar</el-button>
-        <el-button type="primary" :loading="guardando" class="red-btn" @click="guardarCategoria">
-          {{ modoEdicion ? 'Actualizar' : 'Crear' }}
+        <el-button
+          type="primary"
+          :loading="guardando"
+          class="red-btn"
+          @click="guardarCategoria"
+        >
+          {{ modoEdicion ? "Actualizar" : "Crear" }}
         </el-button>
       </span>
     </el-dialog>
-
   </div>
 </template>
 
@@ -178,8 +227,12 @@ export default {
         entrenador_id: ''
       },
       rules: {
-        nombre_categoria: [{ required: true, message: 'Requerido', trigger: 'blur' }],
-        entrenador_id: [{ required: true, message: 'Requerido', trigger: 'change' }]
+        nombre_categoria: [
+          { required: true, message: 'Requerido', trigger: 'blur' }
+        ],
+        entrenador_id: [
+          { required: true, message: 'Requerido', trigger: 'change' }
+        ]
       }
     }
   },
@@ -192,11 +245,15 @@ export default {
 
       if (this.searchQuery) {
         const q = this.searchQuery.toLowerCase()
-        result = result.filter(c => c.nombre_categoria.toLowerCase().includes(q))
+        result = result.filter((c) =>
+          c.nombre_categoria.toLowerCase().includes(q)
+        )
       }
 
       if (this.filtroEntrenador) {
-        result = result.filter(c => c.entrenador_id === this.filtroEntrenador)
+        result = result.filter(
+          (c) => c.entrenador_id === this.filtroEntrenador
+        )
       }
 
       return result
@@ -211,7 +268,11 @@ export default {
       try {
         const [catResponse, entResponse] = await Promise.all([
           request({ url: '/categoria', method: 'get' }),
-          request({ url: '/plantel', method: 'get', params: { rol: 'ENTRENADOR' }})
+          request({
+            url: '/plantel',
+            method: 'get',
+            params: { rol: 'ENTRENADOR' }
+          })
         ])
 
         this.categorias = Array.isArray(catResponse) ? catResponse : []
@@ -229,7 +290,7 @@ export default {
     },
     getEntrenadorName(id) {
       if (!id) return 'No Asignado'
-      const ent = this.entrenadores.find(e => e.plantel_id === id)
+      const ent = this.entrenadores.find((e) => e.plantel_id === id)
       return ent ? `${ent.nombre} ${ent.apellido}` : 'No Encontrado'
     },
     nuevaCategoria() {
@@ -265,7 +326,9 @@ export default {
       this.$refs.form.validate(async(valid) => {
         if (valid) {
           if (this.formulario.edad_min >= this.formulario.edad_max) {
-            this.$message.warning('La edad mínima debe ser menor que la máxima')
+            this.$message.warning(
+              'La edad mínima debe ser menor que la máxima'
+            )
             return
           }
 
@@ -302,7 +365,11 @@ export default {
         await this.$confirm(
           `¿Eliminar categoría "${categoria.nombre_categoria}"?`,
           'Confirmar',
-          { type: 'warning', confirmButtonText: 'Eliminar', cancelButtonText: 'Cancelar' }
+          {
+            type: 'warning',
+            confirmButtonText: 'Eliminar',
+            cancelButtonText: 'Cancelar'
+          }
         )
 
         await request({
@@ -331,7 +398,7 @@ export default {
 
 /* Header Red Style */
 .page-header {
-  background: linear-gradient(135deg, #E51D22, #c41a1d);
+  background: linear-gradient(135deg, #7B2D3A, #7B2D3A);
   color: white;
   padding: 24px;
   border-radius: 8px;
@@ -377,9 +444,66 @@ export default {
 .control-item label {
   display: block;
   font-size: 0.85rem;
-  color: #64748b;
-  font-weight: 600;
+  color: #1e293b;
+  font-weight: 700;
   margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Estilos prominentes para campos de formulario */
+.control-item ::v-deep .el-input__inner,
+.control-item ::v-deep .el-select .el-input__inner {
+  background-color: #ffffff !important;
+  border: 2px solid #94a3b8 !important;
+  border-radius: 8px;
+  color: #1e293b !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 12px 15px;
+  height: auto;
+  line-height: 1.5;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.control-item ::v-deep .el-input__inner:hover,
+.control-item ::v-deep .el-select .el-input__inner:hover {
+  border-color: #64748b !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.control-item ::v-deep .el-input__inner:focus,
+.control-item ::v-deep .el-select .el-input.is-focus .el-input__inner {
+  border-color: #7B2D3A !important;
+  box-shadow: 0 0 0 3px rgba(229, 29, 34, 0.15),
+    0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Placeholder más visible */
+.control-item ::v-deep .el-input__inner::placeholder {
+  color: #64748b !important;
+  font-weight: 500;
+}
+
+/* Icono de búsqueda más visible */
+.control-item.search-box ::v-deep .el-input__prefix {
+  left: 12px;
+  color: #7B2D3A !important;
+  font-size: 1.1rem;
+}
+
+.control-item.search-box ::v-deep .el-input__inner {
+  padding-left: 40px;
+}
+
+/* Icono de flecha del select más visible */
+.control-item ::v-deep .el-select .el-input .el-select__caret {
+  color: #7B2D3A !important;
+  font-size: 1rem;
+  font-weight: bold;
 }
 
 /* Grid */
@@ -390,16 +514,21 @@ export default {
 }
 
 .category-card {
-  border: none;
-  border-radius: 12px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid #94a3b8 !important; /* Borde más oscuro y visible por defecto */
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   height: 100%;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background-color: #ffffff;
 }
 
 .category-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: #7B2D3A !important; /* Mantiene cambio a rojo al hover */
 }
 
 .card-header {
@@ -416,7 +545,7 @@ export default {
   width: 50px;
   height: 50px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #E51D22 0%, #ff4d4f 100%);
+  background: linear-gradient(135deg, #7B2D3A 0%, #ff4d4f 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -482,15 +611,24 @@ export default {
   margin-bottom: 8px;
 }
 
-/* Utilities */
-.red-btn {
-  background-color: #E51D22 !important;
-  border-color: #E51D22 !important;
+/* Header Action Button - Card-like framed style (IDENTICAL to atletas) */
+.header-action-btn {
+  background-color: #ffffff !important;
+  color: #7B2D3A !important;
+  border: 2px solid #94a3b8 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  padding: 10px 24px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
-.red-btn:hover {
-  background-color: #cf1a1e !important;
-  border-color: #cf1a1e !important;
+.header-action-btn:hover {
+  transform: translateY(-3px);
+  border-color: #7B2D3A !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  background-color: #fef2f2 !important;
 }
 
 .form-row-2 {

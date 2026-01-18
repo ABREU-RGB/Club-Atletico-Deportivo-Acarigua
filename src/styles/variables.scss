@@ -1,6 +1,6 @@
 :root {
   /* Rojo principal */
-  --color-primary: #E51D22;
+  --color-primary: #7B2D3A;
 
   /* Colores Secundarios/Texto/Fondos */
   --color-background: #ffffff;
@@ -18,18 +18,17 @@ $tiffany: #4AB7BD;
 $yellow: #FEC171;
 $panGreen: #30B08F;
 
-// sidebar - MODIFICADO PARA COINCIDIR CON EL HOME
-$menuText: rgba(255, 255, 255, 0.9); // Texto blanco con opacidad
-$menuActiveText: #ffffff; // Texto blanco cuando está activo
-$subMenuActiveText: rgba(255, 255, 255, 0.9); // Texto de submenús activo
+// sidebar - DISEÑO UNIFICADO (HEADER MATCH)
+$menuText: #ffffff;
+$menuActiveText: #ffffff; // Texto blanco para activo
+$subMenuActiveText: #ffffff; // Texto blanco para subactivo
 
-$menuBg: #E51D22; // Fondo rojo igual que navbar
-$menuHover: rgba(0, 0, 0, 0.15); // Hover con oscurecimiento
+$menuBg: #7B2D3A; // IDÉNTICO AL HEADER
+$menuHover: #60232d; // Hover más oscuro
+$subMenuBg: #4a1b22; // Submenú más oscuro
+$subMenuHover: #361319; // Hover en submenú
 
-$subMenuBg: rgba(0, 0, 0, 0.1); // Fondo oscuro para submenús
-$subMenuHover: rgba(0, 0, 0, 0.2); // Hover más oscuro para submenús
-
-$sideBarWidth: 260px; // Ancho más amplio
+$sideBarWidth: 260px;
 
 // the :export directive is the magic sauce for webpack
 :export {

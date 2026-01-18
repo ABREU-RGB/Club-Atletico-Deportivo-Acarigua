@@ -359,7 +359,7 @@ export default {
 }
 
 .page-header {
-  background: linear-gradient(135deg, #E51D22, #c41a1d);
+  background: linear-gradient(135deg, #7B2D3A, #7B2D3A);
   color: white;
   padding: 24px;
   border-radius: 8px;
@@ -412,9 +412,63 @@ export default {
 .control-item label {
   display: block;
   font-size: 0.85rem;
-  color: #64748b;
+  color: #1e293b;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Estilos prominentes para todos los campos del formulario */
+.control-item ::v-deep .el-input__inner,
+.control-item ::v-deep .el-select .el-input__inner {
+  background-color: #ffffff !important;
+  border: 2px solid #94a3b8 !important;
+  border-radius: 8px;
+  color: #1e293b !important;
   font-weight: 600;
-  margin-bottom: 6px;
+  font-size: 0.95rem;
+  padding: 12px 15px;
+  height: auto;
+  line-height: 1.5;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.control-item ::v-deep .el-input__inner:hover,
+.control-item ::v-deep .el-select .el-input__inner:hover {
+  border-color: #64748b !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.control-item ::v-deep .el-input__inner:focus,
+.control-item ::v-deep .el-select .el-input.is-focus .el-input__inner {
+  border-color: #7B2D3A !important;
+  box-shadow: 0 0 0 3px rgba(229, 29, 34, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Placeholder más visible */
+.control-item ::v-deep .el-input__inner::placeholder {
+  color: #64748b !important;
+  font-weight: 500;
+}
+
+/* Icono de búsqueda más visible */
+.control-item.search-box ::v-deep .el-input__prefix {
+  left: 12px;
+  color: #7B2D3A !important;
+  font-size: 1.1rem;
+}
+
+.control-item.search-box ::v-deep .el-input__inner {
+  padding-left: 40px;
+}
+
+/* Icono de flecha del select más visible */
+.control-item ::v-deep .el-select .el-input .el-select__caret {
+  color: #7B2D3A !important;
+  font-size: 1rem;
+  font-weight: bold;
 }
 
 /* Main Table */
@@ -492,15 +546,15 @@ export default {
 }
 
 .status-group ::v-deep .el-radio-button__orig-radio:checked + .el-radio-button__inner {
-  background-color: #E51D22;
-  border-color: #E51D22;
-  box-shadow: -1px 0 0 0 #E51D22;
+  background-color: #7B2D3A;
+  border-color: #7B2D3A;
+  box-shadow: -1px 0 0 0 #7B2D3A;
 }
 
 /* Custom Overrides */
 ::v-deep .el-button--primary {
-  background-color: #E51D22;
-  border-color: #E51D22;
+  background-color: #7B2D3A;
+  border-color: #7B2D3A;
 }
 
 ::v-deep .el-button--primary:hover {
@@ -526,6 +580,51 @@ export default {
   font-size: 4rem;
   margin-bottom: 20px;
   opacity: 0.5;
+}
+
+/* Header Date Picker - Más visible y prominente */
+.header-date-picker ::v-deep .el-input__inner {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border: 2px solid rgba(255, 255, 255, 0.9) !important;
+  border-radius: 8px;
+  color: #1e293b !important;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 10px 15px 10px 40px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.header-date-picker ::v-deep .el-input__inner:hover {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.25);
+}
+
+.header-date-picker ::v-deep .el-input__inner:focus {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4), 0 6px 12px -2px rgba(0, 0, 0, 0.25);
+}
+
+/* Icono del calendario más visible */
+.header-date-picker ::v-deep .el-input__prefix {
+  left: 10px;
+  color: #7B2D3A !important;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+}
+
+.header-date-picker ::v-deep .el-input__prefix i {
+  color: #7B2D3A !important;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+/* Ajustar el tamaño del input */
+.header-date-picker ::v-deep .el-input {
+  width: 180px;
 }
 
 @media (max-width: 768px) {

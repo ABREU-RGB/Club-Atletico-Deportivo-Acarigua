@@ -53,14 +53,14 @@ export default {
   text-align: center;
   max-width: 600px;
   width: 100%;
-  border-top: 4px solid #E51D22;
+  border-top: 4px solid #7B2D3A;
 
   .icon-wrapper {
     margin-bottom: 24px;
 
     i {
       font-size: 64px;
-      color: #E51D22;
+      color: #7B2D3A;
       opacity: 0.8;
     }
   }
@@ -70,7 +70,7 @@ export default {
     font-weight: 700;
     color: #333;
     margin: 0 0 16px 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   .page-description {
@@ -87,7 +87,7 @@ export default {
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    color: #E51D22;
+    color: #7B2D3A;
     font-size: 14px;
     font-weight: 500;
 

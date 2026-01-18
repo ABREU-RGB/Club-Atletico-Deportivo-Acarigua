@@ -7,7 +7,7 @@
           <h1><i class="el-icon-s-custom" /> Gestión del Plantel</h1>
           <p class="subtitle">Club Atlético Deportivo Acarigua</p>
         </div>
-        <el-button type="primary" icon="el-icon-plus" @click="handleCreate">
+        <el-button type="primary" icon="el-icon-plus" class="header-action-btn" @click="handleCreate">
           Nuevo Miembro
         </el-button>
       </div>
@@ -20,11 +20,7 @@
         <el-card shadow="hover">
           <div slot="header" class="sidebar-header">
             <span><i class="el-icon-user" /> Lista del Plantel</span>
-            <el-popover
-              placement="bottom-end"
-              width="250"
-              trigger="click"
-            >
+            <el-popover placement="bottom-end" width="250" trigger="click">
               <div class="filter-popover">
                 <h4>Filtros Avanzados</h4>
                 <div class="filter-item">
@@ -46,7 +42,12 @@
                   </el-select>
                 </div>
               </div>
-              <el-button slot="reference" type="text" icon="el-icon-s-operation" class="filter-btn" />
+              <el-button
+                slot="reference"
+                type="text"
+                icon="el-icon-s-operation"
+                class="filter-btn"
+              />
             </el-popover>
           </div>
           <div class="search-container">
@@ -72,7 +73,10 @@
               <div class="member-info">
                 <h3>{{ miembro.nombre }} {{ miembro.apellido }}</h3>
                 <p>{{ miembro.rol }}</p>
-                <p><i class="el-icon-phone-outline" /> {{ miembro.telefono || 'Sin teléfono' }}</p>
+                <p>
+                  <i class="el-icon-phone-outline" />
+                  {{ miembro.telefono || "Sin teléfono" }}
+                </p>
               </div>
             </div>
             <div v-if="filteredPlantel.length === 0" class="empty-state-list">
@@ -86,7 +90,7 @@
       <main class="content-area">
         <el-card v-if="!currentMemberId" shadow="hover">
           <div class="empty-state">
-            <i class="el-icon-s-custom" style="font-size: 4rem; color: #ddd;" />
+            <i class="el-icon-s-custom" style="font-size: 4rem; color: #ddd" />
             <h3>No hay miembro seleccionado</h3>
             <p>Selecciona un miembro de la lista o agrega uno nuevo.</p>
           </div>
@@ -100,17 +104,34 @@
             </div>
             <div class="member-details-info">
               <h2>{{ currentMember.nombre }} {{ currentMember.apellido }}</h2>
-              <el-tag :type="getRolTagType(currentMember.rol)">{{ currentMember.rol }}</el-tag>
-              <p style="margin-top: 10px"><i class="el-icon-phone" /> {{ currentMember.telefono || 'No especificado' }}</p>
+              <el-tag :type="getRolTagType(currentMember.rol)">{{
+                currentMember.rol
+              }}</el-tag>
+              <p style="margin-top: 10px">
+                <i class="el-icon-phone" />
+                {{ currentMember.telefono || "No especificado" }}
+              </p>
             </div>
             <div class="member-actions">
-              <el-button type="danger" icon="el-icon-delete" @click="handleDelete(currentMember)">Eliminar</el-button>
-              <el-button type="primary" icon="el-icon-edit" @click="handleEdit(currentMember)">Editar</el-button>
+              <el-button
+                type="danger"
+                icon="el-icon-delete"
+                @click="handleDelete(currentMember)"
+              >Eliminar</el-button>
+              <el-button
+                type="primary"
+                icon="el-icon-edit"
+                @click="handleEdit(currentMember)"
+              >Editar</el-button>
             </div>
           </div>
 
           <!-- Tabs -->
-          <el-tabs v-model="activeTab" type="border-card" style="margin-top: 20px;">
+          <el-tabs
+            v-model="activeTab"
+            type="border-card"
+            style="margin-top: 20px"
+          >
             <!-- Tab 1: Datos Personales (Por ahora la única) -->
             <el-tab-pane label="Datos Generales" name="general">
               <div class="form-grid">
@@ -128,7 +149,7 @@
                 </div>
                 <div class="form-item">
                   <label>Teléfono</label>
-                  <p>{{ currentMember.telefono || 'No especificado' }}</p>
+                  <p>{{ currentMember.telefono || "No especificado" }}</p>
                 </div>
               </div>
             </el-tab-pane>
@@ -154,12 +175,18 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Nombre" prop="nombre">
-              <el-input v-model="formData.nombre" placeholder="Ingrese nombre" />
+              <el-input
+                v-model="formData.nombre"
+                placeholder="Ingrese nombre"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="Apellido" prop="apellido">
-              <el-input v-model="formData.apellido" placeholder="Ingrese apellido" />
+              <el-input
+                v-model="formData.apellido"
+                placeholder="Ingrese apellido"
+              />
             </el-form-item>
           </el-col>
         </el-row>
@@ -179,7 +206,11 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="Rol" prop="rol">
-              <el-select v-model="formData.rol" placeholder="Seleccione rol" style="width: 100%">
+              <el-select
+                v-model="formData.rol"
+                placeholder="Seleccione rol"
+                style="width: 100%"
+              >
                 <el-option
                   v-for="rol in rolesOptions"
                   :key="rol.value"
@@ -194,7 +225,7 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">Cancelar</el-button>
         <el-button type="primary" :loading="submitting" @click="handleSubmit">
-          {{ isEdit ? 'Actualizar' : 'Crear' }}
+          {{ isEdit ? "Actualizar" : "Crear" }}
         </el-button>
       </span>
     </el-dialog>
@@ -202,7 +233,12 @@
 </template>
 
 <script>
-import { getPlantel, createPlantel, updatePlantel, deletePlantel } from '@/api/plantel'
+import {
+  getPlantel,
+  createPlantel,
+  updatePlantel,
+  deletePlantel
+} from '@/api/plantel'
 
 export default {
   name: 'PlantelIndex',
@@ -227,13 +263,25 @@ export default {
       },
       formRules: {
         nombre: [
-          { required: true, message: 'El nombre es obligatorio', trigger: 'blur' }
+          {
+            required: true,
+            message: 'El nombre es obligatorio',
+            trigger: 'blur'
+          }
         ],
         apellido: [
-          { required: true, message: 'El apellido es obligatorio', trigger: 'blur' }
+          {
+            required: true,
+            message: 'El apellido es obligatorio',
+            trigger: 'blur'
+          }
         ],
         telefono: [
-          { pattern: /^[0-9]*$/, message: 'Solo se permiten números', trigger: 'blur' }
+          {
+            pattern: /^[0-9]*$/,
+            message: 'Solo se permiten números',
+            trigger: 'blur'
+          }
         ],
         rol: [
           { required: true, message: 'Seleccione un rol', trigger: 'change' }
@@ -253,9 +301,10 @@ export default {
       let filtered = this.plantelList
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase()
-        filtered = filtered.filter(m =>
-          m.nombre.toLowerCase().includes(query) ||
-          m.apellido.toLowerCase().includes(query)
+        filtered = filtered.filter(
+          (m) =>
+            m.nombre.toLowerCase().includes(query) ||
+            m.apellido.toLowerCase().includes(query)
         )
       }
       return filtered
@@ -281,7 +330,9 @@ export default {
 
         // Si hay un miembro seleccionado, actualizar sus datos
         if (this.currentMemberId) {
-          const found = this.plantelList.find(p => p.plantel_id === this.currentMemberId)
+          const found = this.plantelList.find(
+            (p) => p.plantel_id === this.currentMemberId
+          )
           if (found) {
             this.currentMember = found
           } else {
@@ -301,11 +352,11 @@ export default {
     },
     getRolTagType(rol) {
       const types = {
-        'ENTRENADOR': 'success',
-        'ASISTENTE': 'info',
-        'PREPARADOR_FISICO': '',
-        'MEDICO': 'warning',
-        'ADMINISTRATIVO': 'danger'
+        ENTRENADOR: 'success',
+        ASISTENTE: 'info',
+        PREPARADOR_FISICO: '',
+        MEDICO: 'warning',
+        ADMINISTRATIVO: 'danger'
       }
       return types[rol] || ''
     },
@@ -344,7 +395,9 @@ export default {
 
         // Si estábamos editando, actualizar el miembro actual
         if (this.isEdit && this.currentMemberId === this.editingId) {
-          const updated = this.plantelList.find(p => p.plantel_id === this.editingId)
+          const updated = this.plantelList.find(
+            (p) => p.plantel_id === this.editingId
+          )
           if (updated) this.currentMember = updated
         }
       } catch (error) {
@@ -365,18 +418,21 @@ export default {
           cancelButtonText: 'Cancelar',
           type: 'warning'
         }
-      ).then(async() => {
-        try {
-          await deletePlantel(row.plantel_id)
-          this.$message.success('Miembro eliminado exitosamente')
-          this.currentMemberId = null
-          this.fetchPlantel()
-        } catch (error) {
-          console.error('Error eliminando miembro:', error)
-          const errorMsg = error.response?.data?.error || 'Error al eliminar el miembro'
-          this.$message.error(errorMsg)
-        }
-      }).catch(() => {})
+      )
+        .then(async() => {
+          try {
+            await deletePlantel(row.plantel_id)
+            this.$message.success('Miembro eliminado exitosamente')
+            this.currentMemberId = null
+            this.fetchPlantel()
+          } catch (error) {
+            console.error('Error eliminando miembro:', error)
+            const errorMsg =
+              error.response?.data?.error || 'Error al eliminar el miembro'
+            this.$message.error(errorMsg)
+          }
+        })
+        .catch(() => {})
     },
     resetForm() {
       this.formData = {
@@ -400,7 +456,7 @@ export default {
 }
 
 .page-header {
-  background: linear-gradient(135deg, #E51D22, #c41a1d);
+  background: linear-gradient(135deg, #7B2D3A, #7B2D3A);
   color: white;
   padding: 20px;
   border-radius: 10px;
@@ -460,6 +516,66 @@ export default {
   border-bottom: 1px solid #f0f0f0;
 }
 
+/* Estilos prominentes para el campo de búsqueda */
+.search-container ::v-deep .el-input__inner {
+  background-color: #ffffff !important;
+  border: 2px solid #94a3b8 !important;
+  border-radius: 8px;
+  color: #1e293b !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 10px 15px 10px 40px;
+  height: auto;
+  line-height: 1.5;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.search-container ::v-deep .el-input__inner:hover {
+  border-color: #64748b !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.search-container ::v-deep .el-input__inner:focus {
+  border-color: #7B2D3A !important;
+  box-shadow: 0 0 0 3px rgba(229, 29, 34, 0.15);
+}
+
+.search-container ::v-deep .el-input__inner::placeholder {
+  color: #64748b !important;
+  font-weight: 500;
+}
+
+.search-container ::v-deep .el-input__prefix {
+  left: 12px;
+  color: #7B2D3A !important;
+  font-size: 1.1rem;
+}
+
+/* Estilos para filtros en popover */
+.filter-item ::v-deep .el-input__inner,
+.filter-item ::v-deep .el-select .el-input__inner {
+  background-color: #ffffff !important;
+  border: 2px solid #94a3b8 !important;
+  border-radius: 8px;
+  color: #1e293b !important;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  height: auto;
+  transition: all 0.3s ease;
+}
+
+.filter-item ::v-deep .el-input__inner:focus,
+.filter-item ::v-deep .el-select .el-input.is-focus .el-input__inner {
+  border-color: #7B2D3A !important;
+  box-shadow: 0 0 0 3px rgba(229, 29, 34, 0.15);
+}
+
+.filter-item ::v-deep .el-select .el-input .el-select__caret {
+  color: #7B2D3A !important;
+}
+
 .member-list {
   overflow-y: auto;
   flex: 1;
@@ -481,7 +597,7 @@ export default {
 
 .member-item.active {
   background-color: #fee;
-  border-left: 4px solid #E51D22;
+  border-left: 4px solid #7B2D3A;
 }
 
 .member-photo {
@@ -491,7 +607,7 @@ export default {
   min-height: 40px;
   flex-shrink: 0;
   border-radius: 50%;
-  background-color: #E51D22;
+  background-color: #7B2D3A;
   color: white;
   display: flex;
   align-items: center;
@@ -555,13 +671,13 @@ export default {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background-color: #E51D22;
+  background-color: #7B2D3A;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 40px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .member-details-info {
@@ -599,48 +715,151 @@ export default {
   font-size: 1rem;
 }
 
+/* Estilos del popover de filtros (IDÉNTICO a atletas) */
+.filter-popover {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px solid #7B2D3A;
+  border-radius: 12px;
+  padding: 15px;
+  margin: -12px;
+  box-shadow: 0 4px 15px rgba(123, 45, 58, 0.2);
+}
+
 .filter-popover h4 {
   margin: 0 0 15px 0;
-  font-size: 0.9rem;
-  color: #2c3e50;
-  border-bottom: 1px solid #eee;
+  font-size: 1rem;
+  color: #7B2D3A;
+  font-weight: 700;
+  border-bottom: 2px solid #7B2D3A;
   padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .filter-item {
   margin-bottom: 15px;
 }
 
+.filter-item label {
+  display: block;
+  font-size: 0.85rem;
+  color: #7B2D3A;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Estilos prominentes para campos de filtro */
+.filter-item ::v-deep .el-input__inner,
+.filter-item ::v-deep .el-select .el-input__inner {
+  background-color: #ffffff !important;
+  border: 2px solid #7B2D3A !important;
+  border-radius: 8px;
+  color: #1e293b !important;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  height: auto;
+  transition: all 0.3s ease;
+}
+
+.filter-item ::v-deep .el-input__inner:focus,
+.filter-item ::v-deep .el-select .el-input.is-focus .el-input__inner {
+  border-color: #60232d !important;
+  box-shadow: 0 0 0 3px rgba(123, 45, 58, 0.25);
+}
+
+.filter-item ::v-deep .el-select .el-input .el-select__caret {
+  color: #7B2D3A !important;
+}
+
 .filter-btn {
-  font-size: 1.2rem;
-  color: #64748b;
-  padding: 0;
+  font-size: 1.4rem !important;
+  color: #7B2D3A !important;
+  padding: 6px 10px !important;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+  border: 2px solid #7B2D3A !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
 }
 
 .filter-btn:hover {
-  color: #E51D22;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #7B2D3A 0%, #60232d 100%) !important;
+  border-color: #60232d !important;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(123, 45, 58, 0.35);
+}
+
+/* Estilos para el dropdown de Element UI (IDÉNTICO a atletas) */
+::v-deep .el-select-dropdown__item {
+  padding: 10px 20px;
+  height: auto;
+  line-height: 1.5;
+  border-bottom: 1px solid #f1f5f9;
+  color: #64748b;
+  margin: 0;
+}
+
+::v-deep .el-select-dropdown__item.hover,
+::v-deep .el-select-dropdown__item:hover {
+  background-color: #fef2f2;
+  color: #7B2D3A;
+  font-weight: 600;
+}
+
+::v-deep .el-select-dropdown__item.selected {
+  background-color: #7B2D3A;
+  color: white;
+  font-weight: 700;
+}
+
+::v-deep .el-select-dropdown__list {
+  padding: 5px 0;
 }
 
 ::v-deep .el-button--primary {
-  background-color: #E51D22;
-  border-color: #E51D22;
+  background-color: #7B2D3A;
+  border-color: #7B2D3A;
 }
 
 ::v-deep .el-button--primary:hover,
 ::v-deep .el-button--primary:focus {
-  background-color: #c41a1d;
-  border-color: #c41a1d;
+  background-color: #7B2D3A;
+  border-color: #7B2D3A;
 }
 
 ::v-deep .el-tabs__item.is-active {
-  color: #E51D22;
+  color: #7B2D3A;
 }
 
 ::v-deep .el-tabs__active-bar {
-  background-color: #E51D22;
+  background-color: #7B2D3A;
 }
 
 ::v-deep .el-tabs__item:hover {
-  color: #E51D22;
+  color: #7B2D3A;
+}
+
+/* Header Action Button - Card-like framed style (IDENTICAL to atletas) */
+.header-action-btn {
+  background-color: #ffffff !important;
+  color: #7B2D3A !important;
+  border: 2px solid #94a3b8 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  padding: 10px 24px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.header-action-btn:hover {
+  transform: translateY(-3px);
+  border-color: #7B2D3A !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  background-color: #fef2f2 !important;
 }
 </style>

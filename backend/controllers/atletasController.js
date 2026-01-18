@@ -8,11 +8,17 @@ const getAtletas = async (req, res) => {
                 TIMESTAMPDIFF(YEAR, a.fecha_nacimiento, CURDATE()) as edad,
                 c.nombre_categoria as categoria_nombre,
                 t.nombre_completo as tutor_nombre,
-                d.pais, d.estado, d.municipio, d.localidad
+                p.nombre_posicion as posicion_nombre,
+                d.localidad,
+                pa.nombre_parro as parroquia,
+                m.nombre_mun as municipio
          FROM atletas a 
          LEFT JOIN categoria c ON a.categoria_id = c.categoria_id
          LEFT JOIN tutor t ON a.tutor_id = t.tutor_id
+         LEFT JOIN \`posicion de juego\` p ON a.posicion_de_juego = p.posicion_id
          LEFT JOIN direcciones d ON a.direccion_id = d.direccion_id
+         LEFT JOIN parroquias pa ON d.parroquias_id = pa.parroquias_id
+         LEFT JOIN municipios m ON pa.municipio_id = m.municipio_id
          WHERE 1=1`;
 
     const params = [];
@@ -32,7 +38,7 @@ const getAtletas = async (req, res) => {
       params.push(estatus);
     } else if (!estatus) {
       // Por defecto ocultamos inactivos si no se especifica filtro de estatus
-      query += " AND a.estatus IN ('ACTIVO', 'LESIONADO')";
+      query += " AND a.estatus IN ('Activo', 'Lesionado')";
     }
 
     query += ' ORDER BY a.created_at DESC';
@@ -58,11 +64,17 @@ const getAtletaById = async (req, res) => {
               c.nombre_categoria as categoria_nombre,
               t.nombre_completo as tutor_nombre,
               t.telefono as tutor_telefono,
-              d.pais, d.estado, d.municipio, d.localidad
+              p.nombre_posicion as posicion_nombre,
+              d.localidad,
+              pa.nombre_parro as parroquia,
+              m.nombre_mun as municipio
        FROM atletas a 
        LEFT JOIN categoria c ON a.categoria_id = c.categoria_id
        LEFT JOIN tutor t ON a.tutor_id = t.tutor_id
+       LEFT JOIN \`posicion de juego\` p ON a.posicion_de_juego = p.posicion_id
        LEFT JOIN direcciones d ON a.direccion_id = d.direccion_id
+       LEFT JOIN parroquias pa ON d.parroquias_id = pa.parroquias_id
+       LEFT JOIN municipios m ON pa.municipio_id = m.municipio_id
        WHERE a.atleta_id = ?`,
       [id]
     );

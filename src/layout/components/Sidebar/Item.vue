@@ -42,7 +42,7 @@ export default {
 
 // Estilos para el texto del menú
 .menu-item-text {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: 0.3px;
 }
 </style>

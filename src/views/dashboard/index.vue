@@ -45,7 +45,7 @@ export default {
   text-align: center;
   max-width: 600px;
   width: 100%;
-  border-top: 4px solid #E51D22;
+  border-top: 4px solid #7B2D3A;
 }
 
 .welcome-content {
@@ -54,7 +54,7 @@ export default {
     font-weight: 700;
     color: #333;
     margin: 0 0 40px 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   .user-info {
@@ -67,7 +67,7 @@ export default {
       width: 100px;
       height: 100px;
       border-radius: 50%;
-      border: 4px solid #E51D22;
+      border: 4px solid #7B2D3A;
       box-shadow: 0 4px 12px rgba(229, 29, 34, 0.2);
       transition: transform 0.3s ease;
 
@@ -79,9 +79,9 @@ export default {
     .user-name {
       font-size: 24px;
       font-weight: 600;
-      color: #E51D22;
+      color: #7B2D3A;
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     .user-role {
